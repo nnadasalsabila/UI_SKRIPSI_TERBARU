@@ -24,14 +24,26 @@ st.markdown("Upload data, lakukan analisis, uji stasioneritas, dan buat model AR
 # 3. SIDEBAR MENU
 # -------------------
 st.sidebar.header("📂 Upload Data")
-uploaded_file = st.sidebar.file_uploader("Upload file CSV", type=["csv"])
+uploaded_file = st.sidebar.file_uploader(
+    "Upload file CSV atau Excel", 
+    type=["csv", "xls", "xlsx"]
+)
 
 if uploaded_file:
-    df = pd.read_csv(uploaded_file)
+    file_name = uploaded_file.name.lower()
 
-    # Pastikan kolom date bertipe datetime
+    # Baca file sesuai ekstensi
+    if file_name.endswith(".csv"):
+        df = pd.read_csv(uploaded_file)
+    elif file_name.endswith((".xls", ".xlsx")):
+        df = pd.read_excel(uploaded_file)
+    else:
+        st.error("Format file tidak didukung!")
+        st.stop()
+
+    # Pastikan kolom 'date' bertipe datetime
     if 'date' in df.columns:
-        df['date'] = pd.to_datetime(df['date'])
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
         df = df.sort_values('date')
     else:
         st.error("Kolom 'date' tidak ditemukan di dataset!")
