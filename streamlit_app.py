@@ -42,11 +42,11 @@ if uploaded_file:
         st.stop()
 
     # Pastikan kolom 'date' bertipe datetime
-    if 'date' in df.columns:
-        df['date'] = pd.to_datetime(df['date'], errors='coerce')
-        df = df.sort_values('date')
+    if 'Tanggal' in df.columns:
+        df['Tanggal'] = pd.to_datetime(df['Tanggal'], errors='coerce')
+        df = df.sort_values('Tanggal')
     else:
-        st.error("Kolom 'date' tidak ditemukan di dataset!")
+        st.error("Kolom 'Tanggal' tidak ditemukan di dataset!")
 
     # -------------------
     # TAB MENU
