@@ -23,60 +23,58 @@ st.markdown("Upload data, lakukan analisis, uji stasioneritas, dan buat model AR
 # -------------------
 # 3. SIDEBAR MENU
 # -------------------
+import pandas as pd
+import matplotlib.pyplot as plt
+import streamlit as st
+
 st.sidebar.header("📂 Upload Data")
-uploaded_file = st.sidebar.file_uploader(
-    "Upload file CSV atau Excel", 
-    type=["csv", "xls", "xlsx"]
-)
+uploaded_file = st.sidebar.file_uploader("Upload file CSV/Excel", type=["csv", "xlsx"])
 
 if uploaded_file:
-    file_name = uploaded_file.name.lower()
-
-    # Baca file sesuai ekstensi
-    if file_name.endswith(".csv"):
-        df = pd.read_csv(uploaded_file)
-    elif file_name.endswith((".xls", ".xlsx")):
-        df = pd.read_excel(uploaded_file)
+    # Baca file
+    if uploaded_file.name.endswith(".csv"):
+        data = pd.read_csv(uploaded_file)
     else:
-        st.error("Format file tidak didukung!")
+        data = pd.read_excel(uploaded_file)
+
+    # Pastikan kolom tanggal ada dan jadi index
+    data.columns = data.columns.str.strip()  # bersihkan spasi
+    if 'Tanggal' in data.columns:
+        data['Tanggal'] = pd.to_datetime(data['Tanggal'], errors='coerce')
+        data.set_index('Tanggal', inplace=True)
+    elif 'date' in data.columns:
+        data['date'] = pd.to_datetime(data['date'], errors='coerce')
+        data.set_index('date', inplace=True)
+    else:
+        st.error("Kolom tanggal tidak ditemukan!")
         st.stop()
 
-    # Pastikan kolom 'date' bertipe datetime
-    if 'Tanggal' in df.columns:
-        df['Tanggal'] = pd.to_datetime(df['Tanggal'], errors='coerce')
-        df = df.sort_values('Tanggal')
-    else:
-        st.error("Kolom 'Tanggal' tidak ditemukan di dataset!")
+    # Tab Data
+    tab_data, tab_visual, tab_arimax = st.tabs(["📊 Data", "📈 Visualisasi", "⚙ Model ARIMAX"])
 
-    # -------------------
-    # TAB MENU
-    # -------------------
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 Deskripsi Data",
-                                      "📈 Visualisasi",
-                                      "🧪 Uji Stasioneritas",
-                                      "🤖 Model ARIMAX"])
+    with tab_data:
+        st.subheader("Data Awal")
+        st.dataframe(data)
 
-    # -------------------
-    # TAB 1: DESKRIPSI
-    # -------------------
-    with tab1:
-        st.subheader("Statistik Deskriptif")
-        st.dataframe(df.describe())
+        st.subheader("Cek Missing Value")
+        missing_values = data.isnull().sum()
+        if missing_values.sum() == 0:
+            st.success("Data tidak memiliki missing value")
+        st.write(missing_values)
 
-        st.markdown("### Data Awal")
-        st.dataframe(df.head())
+        st.subheader("Data Visualisasi")
+        fig, ax = plt.subplots(figsize=(12, 6))
+        ax.plot(data.index, data["Harga"])
+        ax.set_xlabel("Tanggal")
+        ax.set_ylabel("Harga")
+        ax.set_title('Grafik Harga Cabai Keriting di Jawa Timur 2021-2024')
+        ax.grid()
+        st.pyplot(fig)
 
-    # -------------------
-    # TAB 2: VISUALISASI
-    # -------------------
-    with tab2:
-        st.subheader("Visualisasi Harga")
-        plt.figure(figsize=(10, 5))
-        sns.lineplot(x='Tanggal', y='Harga', data=df)
-        plt.title("Pergerakan Harga Cabai")
-        plt.xlabel("Tanggal")
-        plt.ylabel("Harga")
-        st.pyplot(plt)
+        st.subheader("Statistik Deskriptif Harga per Tahun")
+        data["Tahun"] = data.index.to_period("Y")
+        statistik = data.groupby("Tahun")["Harga"].describe()
+        st.dataframe(statistik)
 
     # -------------------
     # TAB 3: UJI STASIONERITAS
