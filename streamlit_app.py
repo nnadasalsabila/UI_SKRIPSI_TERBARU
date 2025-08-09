@@ -51,7 +51,10 @@ if uploaded_file:
 
     # Tab Data
     tab_data, tab_visual, tab_arimax = st.tabs(["📊 Data", "📈 Visualisasi", "⚙ Model ARIMAX"])
-
+  
+    # -------------------
+    # TAB 1: DATA
+    # -------------------
     with tab_data:
         st.subheader("Data Awal")
         st.dataframe(data)
@@ -77,26 +80,50 @@ if uploaded_file:
         st.dataframe(statistik)
 
     # -------------------
-    # TAB 3: UJI STASIONERITAS
+    # TAB 2: UJI STASIONERITAS
     # -------------------
-    with tab3:
-        st.subheader("Uji ADF (Augmented Dickey-Fuller)")
-        adf_result = adfuller(df['Harga'])
-        st.write(f"ADF Statistic : {adf_result[0]:.4f}")
-        st.write(f"p-value       : {adf_result[1]:.4f}")
-        if adf_result[1] < 0.05:
-            st.success("Data stasioner (p-value < 0.05)")
+    with tab_stasioneritas:
+        st.subheader("Uji Stasioneritas - Augmented Dickey-Fuller Test")
+    
+        # --- 1. Uji ADF Awal ---
+        result = adfuller(data["Harga"].dropna())
+        st.write("### Hasil Uji ADF (Data Asli)")
+        st.write(f"Test Statistic: {result[0]:.6f}")
+        st.write(f"p-value: {result[1]:.6f}")
+        st.write(f"# Lags Used: {result[2]}")
+        st.write(f"Number of Observations: {result[3]}")
+        st.write("Critical Values:")
+        for key, value in result[4].items():
+            st.write(f"   {key}: {value:.6f}")
+        if result[1] <= 0.05:
+            st.success("Interpretasi: Data stasioner")
+            data_diff = data["Harga"].diff().dropna()  # tetap buat differencing agar ada untuk ACF/PACF
         else:
-            st.warning("Data belum stasioner (p-value >= 0.05)")
-
-        st.markdown("### Plot ACF dan PACF")
-        fig_acf, ax_acf = plt.subplots()
-        plot_acf(df['Harga'], ax=ax_acf, lags=30)
-        st.pyplot(fig_acf)
-
-        fig_pacf, ax_pacf = plt.subplots()
-        plot_pacf(df['Harga'], ax=ax_pacf, lags=30)
-        st.pyplot(fig_pacf)
+            st.warning("Interpretasi: Data tidak stasioner, akan dilakukan differencing")
+            # --- 2. Differencing ---
+            data_diff = data["Harga"].diff().dropna()
+            result_diff = adfuller(data_diff.dropna())
+            st.write("### Hasil Uji ADF Setelah Differencing")
+            st.write(f"Test Statistic: {result_diff[0]:.6f}")
+            st.write(f"p-value: {result_diff[1]:.6f}")
+            st.write(f"# Lags Used: {result_diff[2]}")
+            st.write(f"Number of Observations: {result_diff[3]}")
+            st.write("Critical Values:")
+            for key, value in result_diff[4].items():
+                st.write(f"   {key}: {value:.6f}")
+            if result_diff[1] <= 0.05:
+                st.success("Interpretasi: Data sudah stasioner setelah differencing")
+            else:
+                st.error("Interpretasi: Data masih belum stasioner setelah differencing")
+    
+        # --- 3. Plot ACF dan PACF ---
+        st.subheader("Plot ACF & PACF (Setelah Differencing)")
+        fig, axes = plt.subplots(1, 2, figsize=(16, 4))
+        plot_acf(data_diff, lags=20, ax=axes[0])
+        axes[0].set_title("ACF - Setelah Differencing")
+        plot_pacf(data_diff, lags=20, ax=axes[1])
+        axes[1].set_title("PACF - Setelah Differencing")
+        st.pyplot(fig)
 
     # -------------------
     # TAB 4: MODEL ARIMAX
