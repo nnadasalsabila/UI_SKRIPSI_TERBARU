@@ -50,7 +50,7 @@ if uploaded_file:
         st.stop()
 
     # Tab Data
-    tab_data, tab_stasioneritas, tab_arima, tab_arimax = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "⚙ Model ARIMA", "⚙ Model ARIMAX"])
+    tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX"])
   
     # -------------------
     # TAB 1: DATA
@@ -125,6 +125,41 @@ if uploaded_file:
         axes[1].set_title("PACF - Setelah Differencing")
         st.pyplot(fig)
 
+    # -------------------
+    # TAB : SPLITTING DATA
+    # -------------------
+    with tab_splitting:
+        st.subheader("Splitting Data - Training & Testing")
+        # Buat DataFrame untuk ARIMAX
+        data_arimax = pd.DataFrame({
+            'Y': data['Harga'],
+            'X1': data['Idul Adha'],
+            'X2': data['Natal']
+        })
+    
+        # Pastikan index adalah datetime
+        data_arimax.index = pd.to_datetime(data_arimax.index)
+    
+        # Tentukan tanggal split
+        split_date = '2024-12-25'
+    
+        # Split target (y)
+        y_train = data_arimax['Y'].loc[data_arimax.index < split_date]
+        y_test  = data_arimax['Y'].loc[data_arimax.index >= split_date]
+    
+        # Split eksogen (x)
+        x_train = data_arimax[['X1', 'X2']].loc[data_arimax.index < split_date]
+        x_test  = data_arimax[['X1', 'X2']].loc[data_arimax.index >= split_date]
+    
+        # Tampilkan hasil ke Streamlit
+        st.write("Jumlah data y_train:", len(y_train))
+        st.write("Jumlah data y_test :", len(y_test))
+        st.write("Jumlah data x_train:", len(x_train))
+        st.write("Jumlah data x_test :", len(x_test))
+    
+        st.write("📋 **Preview Data Training**")
+        st.dataframe(y_train.head())
+  
     # -------------------
     # TAB 4: MODEL ARIMAX
     # -------------------
