@@ -1,151 +1,142 @@
+# streamlit_app.py
 import streamlit as st
 import pandas as pd
-import math
-from pathlib import Path
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.arima.model import ARIMA
 
-# Set the title and favicon that appear in the Browser's tab bar.
-st.set_page_config(
-    page_title='GDP dashboard',
-    page_icon=':earth_americas:', # This is an emoji shortcode. Could be a URL too.
-)
+# -------------------
+# 1. PAGE CONFIG
+# -------------------
+st.set_page_config(page_title="Dashboard Prediksi Harga Cabai",
+                   page_icon="🌶️",
+                   layout="wide")
 
-# -----------------------------------------------------------------------------
-# Declare some useful functions.
+# -------------------
+# 2. TITLE
+# -------------------
+st.title("🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur")
+st.markdown("Upload data, lakukan analisis, uji stasioneritas, dan buat model ARIMAX dengan variabel dummy hari besar keagamaan.")
 
-@st.cache_data
-def get_gdp_data():
-    """Grab GDP data from a CSV file.
+# -------------------
+# 3. SIDEBAR MENU
+# -------------------
+st.sidebar.header("📂 Upload Data")
+uploaded_file = st.sidebar.file_uploader("Upload file CSV", type=["csv"])
 
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
+if uploaded_file:
+    df = pd.read_csv(uploaded_file)
 
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
+    # Pastikan kolom date bertipe datetime
+    if 'date' in df.columns:
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.sort_values('date')
+    else:
+        st.error("Kolom 'date' tidak ditemukan di dataset!")
 
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
+    # -------------------
+    # TAB MENU
+    # -------------------
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Deskripsi Data",
+                                      "📈 Visualisasi",
+                                      "🧪 Uji Stasioneritas",
+                                      "🤖 Model ARIMAX"])
 
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
-    )
+    # -------------------
+    # TAB 1: DESKRIPSI
+    # -------------------
+    with tab1:
+        st.subheader("Statistik Deskriptif")
+        st.dataframe(df.describe())
 
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
+        st.markdown("### Data Awal")
+        st.dataframe(df.head())
 
-    return gdp_df
+    # -------------------
+    # TAB 2: VISUALISASI
+    # -------------------
+    with tab2:
+        st.subheader("Visualisasi Harga")
+        plt.figure(figsize=(10, 5))
+        sns.lineplot(x='date', y='price', data=df)
+        plt.title("Pergerakan Harga Cabai")
+        plt.xlabel("Tanggal")
+        plt.ylabel("Harga")
+        st.pyplot(plt)
 
-gdp_df = get_gdp_data()
-
-# -----------------------------------------------------------------------------
-# Draw the actual page
-
-# Set the title that appears at the top of the page.
-'''
-# :earth_americas: GDP dashboard
-
-Browse GDP data from the [World Bank Open Data](https://data.worldbank.org/) website. As you'll
-notice, the data only goes to 2022 right now, and datapoints for certain years are often missing.
-But it's otherwise a great (and did I mention _free_?) source of data.
-'''
-
-# Add some spacing
-''
-''
-
-min_value = gdp_df['Year'].min()
-max_value = gdp_df['Year'].max()
-
-from_year, to_year = st.slider(
-    'Which years are you interested in?',
-    min_value=min_value,
-    max_value=max_value,
-    value=[min_value, max_value])
-
-countries = gdp_df['Country Code'].unique()
-
-if not len(countries):
-    st.warning("Select at least one country")
-
-selected_countries = st.multiselect(
-    'Which countries would you like to view?',
-    countries,
-    ['DEU', 'FRA', 'GBR', 'BRA', 'MEX', 'JPN'])
-
-''
-''
-''
-
-# Filter the data
-filtered_gdp_df = gdp_df[
-    (gdp_df['Country Code'].isin(selected_countries))
-    & (gdp_df['Year'] <= to_year)
-    & (from_year <= gdp_df['Year'])
-]
-
-st.header('GDP over time', divider='gray')
-
-''
-
-st.line_chart(
-    filtered_gdp_df,
-    x='Year',
-    y='GDP',
-    color='Country Code',
-)
-
-''
-''
-
-
-first_year = gdp_df[gdp_df['Year'] == from_year]
-last_year = gdp_df[gdp_df['Year'] == to_year]
-
-st.header(f'GDP in {to_year}', divider='gray')
-
-''
-
-cols = st.columns(4)
-
-for i, country in enumerate(selected_countries):
-    col = cols[i % len(cols)]
-
-    with col:
-        first_gdp = first_year[first_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-        last_gdp = last_year[last_year['Country Code'] == country]['GDP'].iat[0] / 1000000000
-
-        if math.isnan(first_gdp):
-            growth = 'n/a'
-            delta_color = 'off'
+    # -------------------
+    # TAB 3: UJI STASIONERITAS
+    # -------------------
+    with tab3:
+        st.subheader("Uji ADF (Augmented Dickey-Fuller)")
+        adf_result = adfuller(df['price'])
+        st.write(f"ADF Statistic : {adf_result[0]:.4f}")
+        st.write(f"p-value       : {adf_result[1]:.4f}")
+        if adf_result[1] < 0.05:
+            st.success("Data stasioner (p-value < 0.05)")
         else:
-            growth = f'{last_gdp / first_gdp:,.2f}x'
-            delta_color = 'normal'
+            st.warning("Data belum stasioner (p-value >= 0.05)")
 
-        st.metric(
-            label=f'{country} GDP',
-            value=f'{last_gdp:,.0f}B',
-            delta=growth,
-            delta_color=delta_color
-        )
+        st.markdown("### Plot ACF dan PACF")
+        fig_acf, ax_acf = plt.subplots()
+        plot_acf(df['price'], ax=ax_acf, lags=30)
+        st.pyplot(fig_acf)
+
+        fig_pacf, ax_pacf = plt.subplots()
+        plot_pacf(df['price'], ax=ax_pacf, lags=30)
+        st.pyplot(fig_pacf)
+
+    # -------------------
+    # TAB 4: MODEL ARIMAX
+    # -------------------
+    with tab4:
+        st.subheader("Pemodelan ARIMAX")
+
+        # Pilih variabel dummy hari besar
+        exog_vars = [col for col in df.columns if col not in ['date', 'price']]
+        if exog_vars:
+            st.write("Variabel exogenous terdeteksi:", exog_vars)
+            exog_data = df[exog_vars]
+        else:
+            st.warning("Tidak ada variabel dummy hari besar di dataset!")
+            exog_data = None
+
+        # Input parameter model
+        p = st.number_input("p (AR)", 0, 10, 1)
+        d = st.number_input("d (Difference)", 0, 2, 1)
+        q = st.number_input("q (MA)", 0, 10, 1)
+
+        if st.button("Fit Model"):
+            try:
+                model = ARIMA(df['price'], order=(p, d, q), exog=exog_data)
+                model_fit = model.fit()
+                st.write(model_fit.summary())
+
+                # Forecast ke depan
+                n_forecast = st.number_input("Jumlah hari prediksi", 1, 30, 7)
+                forecast = model_fit.get_forecast(steps=n_forecast, exog=exog_data.tail(n_forecast) if exog_data is not None else None)
+                forecast_df = forecast.summary_frame()
+
+                st.subheader("Hasil Prediksi")
+                st.dataframe(forecast_df)
+
+                # Plot hasil prediksi
+                fig, ax = plt.subplots(figsize=(10, 5))
+                ax.plot(df['date'], df['price'], label="Data Aktual")
+                ax.plot(pd.date_range(df['date'].iloc[-1], periods=n_forecast+1, freq='D')[1:], forecast_df['mean'], label="Forecast", color='red')
+                ax.fill_between(pd.date_range(df['date'].iloc[-1], periods=n_forecast+1, freq='D')[1:],
+                                forecast_df['mean_ci_lower'],
+                                forecast_df['mean_ci_upper'], color='pink', alpha=0.3)
+                ax.set_title("Prediksi Harga Cabai")
+                ax.set_xlabel("Tanggal")
+                ax.set_ylabel("Harga")
+                ax.legend()
+                st.pyplot(fig)
+
+            except Exception as e:
+                st.error(f"Terjadi kesalahan: {e}")
+
+else:
+    st.info("Silakan upload file CSV terlebih dahulu.")
