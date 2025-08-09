@@ -50,7 +50,7 @@ if uploaded_file:
         st.stop()
 
     # Tab Data
-    tab_data, tab_visual, tab_arimax = st.tabs(["📊 Data", "📈 Visualisasi", "⚙ Model ARIMAX"])
+    tab_data, tab_stasioneritas, tab_arima, tab_arimax = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "⚙ Model ARIMA", "⚙ Model ARIMAX"])
   
     # -------------------
     # TAB 1: DATA
