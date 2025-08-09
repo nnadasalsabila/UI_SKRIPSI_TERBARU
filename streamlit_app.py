@@ -159,6 +159,10 @@ if uploaded_file:
     
         st.write("📋 **Preview Data Training**")
         st.dataframe(y_train.head())
+        st.dataframe(x_train.head())
+        st.write("📋 **Preview Data Testing**")
+        st.dataframe(y_test.head())
+        st.dataframe(x_test.head())
   
     # -------------------
     # TAB 4: MODEL ARIMAX
