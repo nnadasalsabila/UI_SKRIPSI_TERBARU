@@ -72,7 +72,7 @@ if uploaded_file:
     with tab2:
         st.subheader("Visualisasi Harga")
         plt.figure(figsize=(10, 5))
-        sns.lineplot(x='date', y='price', data=df)
+        sns.lineplot(x='Tanggal', y='Harga', data=df)
         plt.title("Pergerakan Harga Cabai")
         plt.xlabel("Tanggal")
         plt.ylabel("Harga")
@@ -83,7 +83,7 @@ if uploaded_file:
     # -------------------
     with tab3:
         st.subheader("Uji ADF (Augmented Dickey-Fuller)")
-        adf_result = adfuller(df['price'])
+        adf_result = adfuller(df['Harga'])
         st.write(f"ADF Statistic : {adf_result[0]:.4f}")
         st.write(f"p-value       : {adf_result[1]:.4f}")
         if adf_result[1] < 0.05:
@@ -93,11 +93,11 @@ if uploaded_file:
 
         st.markdown("### Plot ACF dan PACF")
         fig_acf, ax_acf = plt.subplots()
-        plot_acf(df['price'], ax=ax_acf, lags=30)
+        plot_acf(df['Harga'], ax=ax_acf, lags=30)
         st.pyplot(fig_acf)
 
         fig_pacf, ax_pacf = plt.subplots()
-        plot_pacf(df['price'], ax=ax_pacf, lags=30)
+        plot_pacf(df['Harga'], ax=ax_pacf, lags=30)
         st.pyplot(fig_pacf)
 
     # -------------------
@@ -107,7 +107,7 @@ if uploaded_file:
         st.subheader("Pemodelan ARIMAX")
 
         # Pilih variabel dummy hari besar
-        exog_vars = [col for col in df.columns if col not in ['date', 'price']]
+        exog_vars = [col for col in df.columns if col not in ['Tanggal', 'Harga']]
         if exog_vars:
             st.write("Variabel exogenous terdeteksi:", exog_vars)
             exog_data = df[exog_vars]
@@ -122,7 +122,7 @@ if uploaded_file:
 
         if st.button("Fit Model"):
             try:
-                model = ARIMA(df['price'], order=(p, d, q), exog=exog_data)
+                model = ARIMA(df['Harga'], order=(p, d, q), exog=exog_data)
                 model_fit = model.fit()
                 st.write(model_fit.summary())
 
@@ -136,9 +136,9 @@ if uploaded_file:
 
                 # Plot hasil prediksi
                 fig, ax = plt.subplots(figsize=(10, 5))
-                ax.plot(df['date'], df['price'], label="Data Aktual")
-                ax.plot(pd.date_range(df['date'].iloc[-1], periods=n_forecast+1, freq='D')[1:], forecast_df['mean'], label="Forecast", color='red')
-                ax.fill_between(pd.date_range(df['date'].iloc[-1], periods=n_forecast+1, freq='D')[1:],
+                ax.plot(df['Tanggal'], df['Harga'], label="Data Aktual")
+                ax.plot(pd.date_range(df['Tanggal'].iloc[-1], periods=n_forecast+1, freq='D')[1:], forecast_df['mean'], label="Forecast", color='red')
+                ax.fill_between(pd.date_range(df['Tanggal'].iloc[-1], periods=n_forecast+1, freq='D')[1:],
                                 forecast_df['mean_ci_lower'],
                                 forecast_df['mean_ci_upper'], color='pink', alpha=0.3)
                 ax.set_title("Prediksi Harga Cabai")
