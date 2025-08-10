@@ -50,7 +50,7 @@ if uploaded_file:
         st.stop()
 
     # Tab Data
-    tab_data, tab_stasioneritas, tab_splitting, tab_arimax = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMAX"])
+    tab_data, tab_stasioneritas, tab_splitting, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMAX", "Prediksi & Evaluasi"])
   
     # -------------------
     # TAB 1: DATA
@@ -279,3 +279,88 @@ if uploaded_file:
     
             else:
                 st.warning("Tidak ada model yang semua p-valunya < 0.05.")
+
+    # -------------------
+    # TAB : PREDIKSI & EVALUASI
+    # -------------------
+    with tab_predval:
+        st.subheader("Prediksi & Evaluasi Model ARIMAX")
+    
+        if best_model is not None:
+            st.success(f"Model terbaik: ARIMAX{best_order} dengan AIC = {best_aic:.2f}")
+    
+            # === 1. Prediksi ===
+            pred_train = best_model.predict(
+                start=y_train.index[0],
+                end=y_train.index[-1],
+                exog=x_train,
+                dynamic=False
+            )
+    
+            pred_test = best_model.predict(
+                start=y_test.index[0],
+                end=y_test.index[-1],
+                exog=x_test,
+                dynamic=False
+            )
+    
+            # Gabungkan hasil prediksi
+            prediksi = pd.concat([
+                pred_train.rename('Prediksi_Train'),
+                pred_test.rename('Prediksi_Test')
+            ])
+    
+            # === 2. Visualisasi Prediksi Train + Test ===
+            fig1, ax1 = plt.subplots(figsize=(18, 6))
+            ax1.plot(y_train, label='Data Train (Aktual)', color='red')
+            ax1.plot(y_test, label='Data Test (Aktual)', color='purple')
+            ax1.plot(pred_train, label='Prediksi Train', color='lightskyblue')
+            ax1.plot(pred_test, label='Prediksi Test', color='pink')
+            ax1.axvline(y_test.index[0], color='green', linestyle='--', label='Train/Test Split')
+            ax1.set_title(f'Prediksi Harga Cabai Keriting dengan ARIMAX {best_order}')
+            ax1.set_xlabel('Tanggal')
+            ax1.set_ylabel('Harga')
+            ax1.legend()
+            ax1.grid(True)
+            st.pyplot(fig1)
+    
+            # === 3. Visualisasi Prediksi Test Saja ===
+            fig2, ax2 = plt.subplots(figsize=(12, 5))
+            ax2.plot(y_test, label='Data Test (Aktual)', color='red')
+            ax2.plot(pred_test, label='Prediksi Test', color='blue')
+            ax2.set_title('Prediksi Data Test')
+            ax2.set_xlabel('Tanggal')
+            ax2.set_ylabel('Harga')
+            ax2.legend()
+            ax2.grid(True)
+            st.pyplot(fig2)
+    
+            # === 4. Tabel Hasil Prediksi Test ===
+            hasil_df = pd.DataFrame({
+                'Tanggal': y_test.index,
+                'Aktual': y_test.values,
+                'Prediksi': pred_test.values
+            })
+            st.dataframe(hasil_df)
+    
+            # === 5. Evaluasi ===
+            from sklearn.metrics import mean_absolute_percentage_error, mean_squared_error
+            import numpy as np
+    
+            mape_train = mean_absolute_percentage_error(y_train, pred_train) * 100
+            rmse_train = np.sqrt(mean_squared_error(y_train, pred_train))
+    
+            mape_test = mean_absolute_percentage_error(y_test, pred_test) * 100
+            rmse_test = np.sqrt(mean_squared_error(y_test, pred_test))
+    
+            st.markdown(f"""
+            **Evaluasi Model ARIMAX {best_order}**
+            - MAPE Train : {mape_train:.2f} %
+            - RMSE Train : {rmse_train:.2f}
+            - MAPE Test  : {mape_test:.2f} %
+            - RMSE Test  : {rmse_test:.2f}
+            """)
+    
+        else:
+            st.warning("Tidak ada model ARIMAX terbaik yang ditemukan.")
+
