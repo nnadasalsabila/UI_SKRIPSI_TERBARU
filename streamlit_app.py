@@ -352,15 +352,22 @@ if uploaded_file:
             st.dataframe(hasil_df)
     
             # === 5. Evaluasi ===
-            from sklearn.metrics import mean_absolute_percentage_error, mean_squared_error
             import numpy as np
-    
-            mape_train = mean_absolute_percentage_error(y_train, pred_train) * 100
-            rmse_train = np.sqrt(mean_squared_error(y_train, pred_train))
-    
-            mape_test = mean_absolute_percentage_error(y_test, pred_test) * 100
-            rmse_test = np.sqrt(mean_squared_error(y_test, pred_test))
-    
+            from sklearn.metrics import mean_squared_error  # kalau mau sekalian hilangkan juga ini
+            
+            # Hitung MAPE manual
+            def mean_absolute_percentage_error(y_true, y_pred):
+                y_true, y_pred = np.array(y_true), np.array(y_pred)
+                mask = y_true != 0  # hindari pembagian nol
+                return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
+            
+            # === 5. Evaluasi ===
+            mape_train = mean_absolute_percentage_error(y_train, pred_train)
+            rmse_train = np.sqrt(np.mean((y_train - pred_train) ** 2))
+            
+            mape_test = mean_absolute_percentage_error(y_test, pred_test)
+            rmse_test = np.sqrt(np.mean((y_test - pred_test) ** 2))
+            
             st.markdown(f"""
             **Evaluasi Model ARIMAX {best_order}**
             - MAPE Train : {mape_train:.2f} %
@@ -368,6 +375,3 @@ if uploaded_file:
             - MAPE Test  : {mape_test:.2f} %
             - RMSE Test  : {rmse_test:.2f}
             """)
-    
-        else:
-            st.warning("Tidak ada model ARIMAX terbaik yang ditemukan.")
