@@ -271,7 +271,7 @@ if uploaded_file:
                 gq_test = het_goldfeldquandt(residual, x_train_const)
                 st.write("**Goldfeld-Quandt Test**")
                 st.write(f"Statistik GQ: {gq_test[0]:.8f}")
-                st.write(f"P-value     : {gq_test[1]:.8f}")
+                st.write(f"P-value     :" repr(gq_test[1]))
                 if gq_test[1] <= 0.05:
                     st.error("Ada heteroskedastisitas (tolak H0)")
                 else:
