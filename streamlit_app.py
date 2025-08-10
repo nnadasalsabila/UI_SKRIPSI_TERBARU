@@ -183,6 +183,11 @@ if uploaded_file:
         with col3:
             q_max = st.number_input("Maksimum q", min_value=0, max_value=10, value=7)
     
+        # Inisialisasi agar tidak NameError di tab berikutnya
+        best_model = None
+        best_order = None
+        best_aic = None
+    
         if st.button("Jalankan ARIMAX"):
             results = []
             significant_models = []
@@ -204,7 +209,7 @@ if uploaded_file:
                                         'AIC': model_fit.aic,
                                         'p-values': pvalues,
                                         'Summary': model_fit.summary(),
-                                        'ModelFit': model_fit  # simpan model fit
+                                        'ModelFit': model_fit
                                     })
     
                                 results.append({
@@ -229,12 +234,15 @@ if uploaded_file:
                 st.dataframe(summary_df)
     
                 # Ambil model terbaik
-                best_model = min(significant_models, key=lambda x: x['AIC'])
-                best_result = best_model['ModelFit']  # simpan hasil fit terbaik
+                best_model_info = min(significant_models, key=lambda x: x['AIC'])
+                best_model = best_model_info['ModelFit']
+                best_order = best_model_info['Order (p,d,q)']
+                best_aic = best_model_info['AIC']
+                best_result = best_model
     
-                st.write(f"### Model terbaik: ARIMAX{best_model['Order (p,d,q)']}")
-                st.write(f"**AIC:** {best_model['AIC']}")
-                st.text(best_model['Summary'])
+                st.write(f"### Model terbaik: ARIMAX{best_order}")
+                st.write(f"**AIC:** {best_aic}")
+                st.text(best_model_info['Summary'])
     
                 # -------------------
                 # Uji Diagnostik
@@ -271,7 +279,7 @@ if uploaded_file:
                 gq_test = het_goldfeldquandt(residual, x_train_const)
                 st.write("**Goldfeld-Quandt Test**")
                 st.write(f"Statistik GQ: {gq_test[0]:.8f}")
-                st.write(f"P-value     :", float(gq_test[1]))
+                st.write("P-value     :", gq_test[1])  # tampilkan tanpa pembulatan
                 if gq_test[1] <= 0.05:
                     st.error("Ada heteroskedastisitas (tolak H0)")
                 else:
@@ -363,4 +371,3 @@ if uploaded_file:
     
         else:
             st.warning("Tidak ada model ARIMAX terbaik yang ditemukan.")
-
