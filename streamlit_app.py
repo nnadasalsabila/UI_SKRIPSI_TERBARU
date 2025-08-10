@@ -249,8 +249,8 @@ if uploaded_file:
                 # Uji KS
                 ks_stat, ks_p_value = stats.kstest(best_result.resid, 'norm', args=(0, 1))
                 st.write(f"**Kolmogorov-Smirnov Test**")
-                st.write(f"Statistik KS: {ks_stat:.4f}")
-                st.write(f"P-value     : {ks_p_value:.4f}")
+                st.write(f"Statistik KS: {ks_stat:.8f}")
+                st.write(f"P-value     : {ks_p_value:.8f}")
                 if ks_p_value > 0.05:
                     st.success("Residual terdistribusi normal (gagal menolak H0).")
                 else:
@@ -270,8 +270,8 @@ if uploaded_file:
                 x_train_const = add_constant(x_train)
                 gq_test = het_goldfeldquandt(residual, x_train_const)
                 st.write("**Goldfeld-Quandt Test**")
-                st.write(f"Statistik GQ: {gq_test[0]:.4f}")
-                st.write(f"P-value     : {gq_test[1]:.4f}")
+                st.write(f"Statistik GQ: {gq_test[0]:.8f}")
+                st.write(f"P-value     : {gq_test[1]:.8f}")
                 if gq_test[1] <= 0.05:
                     st.error("Ada heteroskedastisitas (tolak H0)")
                 else:
