@@ -283,7 +283,7 @@ if uploaded_file:
     # -------------------
     # TAB : PREDIKSI & EVALUASI
     # -------------------
-    with tab_predval:
+    with tab_predeval:
         st.subheader("Prediksi & Evaluasi Model ARIMAX")
     
         if best_model is not None:
