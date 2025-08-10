@@ -50,7 +50,7 @@ if uploaded_file:
         st.stop()
 
     # Tab Data
-    tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX"])
+    tab_data, tab_stasioneritas, tab_splitting, tab_arimax = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMAX"])
   
     # -------------------
     # TAB 1: DATA
@@ -163,56 +163,47 @@ if uploaded_file:
         st.write("📋 **Preview Data Testing**")
         st.dataframe(y_test.head())
         st.dataframe(x_test.head())
-  
+
     # -------------------
-    # TAB 4: MODEL ARIMAX
+    # TAB : ARIMAX
     # -------------------
-    with tab4:
+    with tab_arimax:
         st.subheader("Pemodelan ARIMAX")
-
-        # Pilih variabel dummy hari besar
-        exog_vars = [col for col in df.columns if col not in ['Tanggal', 'Harga']]
-        if exog_vars:
-            st.write("Variabel exogenous terdeteksi:", exog_vars)
-            exog_data = df[exog_vars]
+    
+        from statsmodels.tsa.statespace.sarimax import SARIMAX
+    
+        # Range parameter ARIMAX
+        p_values = range(0, 5)
+        d_values = range(1, 2)  # biasanya 1 cukup
+        q_values = range(0, 8)
+    
+        results = []
+    
+        # Looping semua kombinasi p,d,q
+        for p in p_values:
+            for d in d_values:
+                for q in q_values:
+                    try:
+                        model = SARIMAX(y_train, order=(p, d, q), exog=x_train)
+                        model_fit = model.fit(disp=False)
+    
+                        results.append({
+                            'Order': (p, d, q),
+                            'AIC': model_fit.aic,
+                            'Summary': model_fit.summary()
+                        })
+    
+                    except Exception as e:
+                        st.write(f"Error pada ARIMAX({p},{d},{q}): {e}")
+                        continue
+    
+        # Cari model terbaik berdasarkan AIC terkecil
+        if results:
+            best_model = min(results, key=lambda x: x['AIC'])
+    
+            st.write(f"### Model Terbaik: ARIMAX{best_model['Order']}")
+            st.write(f"**AIC:** {best_model['AIC']}")
+            st.text(best_model['Summary'])
+    
         else:
-            st.warning("Tidak ada variabel dummy hari besar di dataset!")
-            exog_data = None
-
-        # Input parameter model
-        p = st.number_input("p (AR)", 0, 10, 1)
-        d = st.number_input("d (Difference)", 0, 2, 1)
-        q = st.number_input("q (MA)", 0, 10, 1)
-
-        if st.button("Fit Model"):
-            try:
-                model = ARIMA(df['Harga'], order=(p, d, q), exog=exog_data)
-                model_fit = model.fit()
-                st.write(model_fit.summary())
-
-                # Forecast ke depan
-                n_forecast = st.number_input("Jumlah hari prediksi", 1, 30, 7)
-                forecast = model_fit.get_forecast(steps=n_forecast, exog=exog_data.tail(n_forecast) if exog_data is not None else None)
-                forecast_df = forecast.summary_frame()
-
-                st.subheader("Hasil Prediksi")
-                st.dataframe(forecast_df)
-
-                # Plot hasil prediksi
-                fig, ax = plt.subplots(figsize=(10, 5))
-                ax.plot(df['Tanggal'], df['Harga'], label="Data Aktual")
-                ax.plot(pd.date_range(df['Tanggal'].iloc[-1], periods=n_forecast+1, freq='D')[1:], forecast_df['mean'], label="Forecast", color='red')
-                ax.fill_between(pd.date_range(df['Tanggal'].iloc[-1], periods=n_forecast+1, freq='D')[1:],
-                                forecast_df['mean_ci_lower'],
-                                forecast_df['mean_ci_upper'], color='pink', alpha=0.3)
-                ax.set_title("Prediksi Harga Cabai")
-                ax.set_xlabel("Tanggal")
-                ax.set_ylabel("Harga")
-                ax.legend()
-                st.pyplot(fig)
-
-            except Exception as e:
-                st.error(f"Terjadi kesalahan: {e}")
-
-else:
-    st.info("Silakan upload file CSV terlebih dahulu.")
+            st.error("Tidak ada model yang berhasil difit.")
