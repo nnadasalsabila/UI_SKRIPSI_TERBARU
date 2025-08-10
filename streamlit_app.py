@@ -167,10 +167,12 @@ if uploaded_file:
     # -------------------
     # TAB : ARIMAX
     # -------------------
+
     with tab_arimax:
         st.subheader("Pemodelan ARIMAX")
     
         from statsmodels.tsa.statespace.sarimax import SARIMAX
+        import pandas as pd
     
         # Range parameter ARIMAX
         p_values = range(0, 5)
@@ -178,32 +180,58 @@ if uploaded_file:
         q_values = range(0, 8)
     
         results = []
+        significant_models = []
     
-        # Looping semua kombinasi p,d,q
-        for p in p_values:
-            for d in d_values:
-                for q in q_values:
-                    try:
-                        model = SARIMAX(y_train, order=(p, d, q), exog=x_train)
-                        model_fit = model.fit(disp=False)
+        with st.spinner("Sedang melakukan fitting model ARIMAX..."):
+            for p in p_values:
+                for d in d_values:
+                    for q in q_values:
+                        try:
+                            model = SARIMAX(y_train, order=(p, d, q), exog=x_train)
+                            model_fit = model.fit(disp=False)
     
-                        results.append({
-                            'Order': (p, d, q),
-                            'AIC': model_fit.aic,
-                            'Summary': model_fit.summary()
-                        })
+                            # Ambil p-value
+                            pvalues = model_fit.pvalues
     
-                    except Exception as e:
-                        st.write(f"Error pada ARIMAX({p},{d},{q}): {e}")
-                        continue
+                            # Cek jika semua p-value < 0.05
+                            if all(pv < 0.05 for pv in pvalues):
+                                significant_models.append({
+                                    'Order (p,d,q)': (p, d, q),
+                                    'AIC': model_fit.aic,
+                                    'p-values': pvalues,
+                                    'Summary': model_fit.summary()
+                                })
     
-        # Cari model terbaik berdasarkan AIC terkecil
-        if results:
-            best_model = min(results, key=lambda x: x['AIC'])
+                            # Simpan semua hasil
+                            results.append({
+                                'Order (p,d,q)': (p, d, q),
+                                'AIC': model_fit.aic,
+                                'p-values': pvalues,
+                                'Summary': model_fit.summary()
+                            })
     
-            st.write(f"### Model Terbaik: ARIMAX{best_model['Order']}")
+                        except Exception as e:
+                            st.write(f"Error pada ARIMAX({p},{d},{q}): {e}")
+                            continue
+    
+        if significant_models:
+            # Dataframe model signifikan
+            summary_df = pd.DataFrame({
+                'Order (p,d,q)': [m['Order (p,d,q)'] for m in significant_models],
+                'AIC': [m['AIC'] for m in significant_models]
+            }).sort_values(by='AIC').reset_index(drop=True)
+    
+            st.write("### Model signifikan (p-value < 0.05):")
+            st.dataframe(summary_df)
+    
+            # Ambil model terbaik (AIC terkecil)
+            best_model = min(significant_models, key=lambda x: x['AIC'])
+    
+            st.write(f"### Model terbaik: ARIMAX{best_model['Order (p,d,q)']}")
             st.write(f"**AIC:** {best_model['AIC']}")
+    
+            # Tampilkan summary model terbaik
             st.text(best_model['Summary'])
     
         else:
-            st.error("Tidak ada model yang berhasil difit.")
+            st.warning("Tidak ada model yang semua p-valunya < 0.05.")
