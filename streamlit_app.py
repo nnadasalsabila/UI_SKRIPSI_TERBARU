@@ -353,7 +353,6 @@ if uploaded_file:
     
             # === 5. Evaluasi ===
             import numpy as np
-            from sklearn.metrics import mean_squared_error  # kalau mau sekalian hilangkan juga ini
             
             # Hitung MAPE manual
             def mean_absolute_percentage_error(y_true, y_pred):
