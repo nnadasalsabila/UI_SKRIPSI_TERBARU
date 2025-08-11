@@ -202,14 +202,9 @@ if uploaded_file:
             q_end = st.number_input("Q sampai", min_value=q_start+1, max_value=10, value=8, key="arima_q_end")
         
         # Buat range berdasarkan input
-        p_values = range(p_start, p_end)
-        d_values = range(d_start, d_end)
-        q_values = range(q_start, q_end)
-        
-        st.write(f"📌 Rentang P: {list(p_values)}")
-        st.write(f"📌 Rentang D: {list(d_values)}")
-        st.write(f"📌 Rentang Q: {list(q_values)}")
-
+        p = range(p_start, p_end)
+        d = range(d_start, d_end)
+        q = range(q_start, q_end)
       
         # Inisialisasi variabel agar tidak NameError di tab berikutnya
         arima_best_model = None
@@ -221,9 +216,9 @@ if uploaded_file:
             significant_models = []
     
             with st.spinner("🔄 Sedang mencari kombinasi ARIMA terbaik..."):
-                for p in range(0, p_max + 1):
-                    for d in range(0, d_max + 1):
-                        for q in range(0, q_max + 1):
+                for p_val in p:
+                    for d_val in d:
+                        for q_val q:
                             try:
                                 model = ARIMA(y_train_arima, order=(p, d, q))
                                 model_fit = model.fit()
