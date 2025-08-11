@@ -218,7 +218,7 @@ if uploaded_file:
             with st.spinner("🔄 Sedang mencari kombinasi ARIMA terbaik..."):
                 for p_val in p:
                     for d_val in d:
-                        for q_val q:
+                        for q_val in q:
                             try:
                                 model = ARIMA(y_train_arima, order=(p, d, q))
                                 model_fit = model.fit()
