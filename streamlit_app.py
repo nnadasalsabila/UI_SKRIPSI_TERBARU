@@ -177,12 +177,13 @@ if uploaded_file:
         # Input parameter range manual
         col1, col2, col3 = st.columns(3)
         with col1:
-            p_max = st.number_input("Maksimum p", min_value=0, max_value=10, value=4)
+            p_max = st.number_input("Maksimum p (ARIMA)", min_value=0, max_value=10, value=4, key="arima_p_max")
         with col2:
-            d_max = st.number_input("Maksimum d", min_value=0, max_value=2, value=1)
+            d_max = st.number_input("Maksimum d (ARIMA)", min_value=0, max_value=2, value=1, key="arima_d_max")
         with col3:
-            q_max = st.number_input("Maksimum q", min_value=0, max_value=10, value=7)
-    
+            q_max = st.number_input("Maksimum q (ARIMA)", min_value=0, max_value=10, value=7, key="arima_q_max")
+
+      
         # Inisialisasi variabel agar tidak NameError di tab berikutnya
         arima_best_model = None
         arima_best_order = None
