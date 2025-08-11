@@ -167,6 +167,20 @@ if uploaded_file:
     # -------------------
     # TAB : ARIMA MODEL
     # -------------------
+ 
+        # Pastikan index adalah datetime
+        data.index = pd.to_datetime(data.index)
+   
+        # Tentukan tanggal split
+        split_date = '2024-12-26'
+    
+        # Split target (y)
+        y_train_arima = data['Harga'].loc[data.index < split_date]
+        y_test_arima  = data['Harga'].loc[data.index >= split_date]
+      
+        # Tampilkan hasil ke Streamlit
+        st.write("Jumlah data y_train:", len(y_train_arima))
+        st.write("Jumlah data y_test :", len(y_train_arima))
 
     with tab_arima:
         st.header("🔍 Pencarian Model ARIMA Terbaik")
@@ -198,7 +212,7 @@ if uploaded_file:
                     for d in range(0, d_max + 1):
                         for q in range(0, q_max + 1):
                             try:
-                                model = ARIMA(y_train, order=(p, d, q))
+                                model = ARIMA(y_train_arima, order=(p, d, q))
                                 model_fit = model.fit()
     
                                 pvalues = model_fit.pvalues
