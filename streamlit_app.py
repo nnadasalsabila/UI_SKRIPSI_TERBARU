@@ -50,7 +50,7 @@ if uploaded_file:
         st.stop()
 
     # Tab Data
-    tab_data, tab_stasioneritas, tab_splitting, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMAX", "Prediksi & Evaluasi"])
+    tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"])
   
     # -------------------
     # TAB 1: DATA
@@ -163,6 +163,79 @@ if uploaded_file:
         st.write("📋 **Preview Data Testing**")
         st.dataframe(y_test.head())
         st.dataframe(x_test.head())
+      
+    # -------------------
+    # TAB : SPLITTING DATA
+    # -------------------
+
+    with tab_arima:
+        st.header("🔍 Pencarian Model ARIMA Terbaik")
+    
+        from statsmodels.tsa.arima.model import ARIMA
+        import pandas as pd
+    
+        # Range parameter ARIMA
+        p_values = range(0, 5)
+        d_values = range(1, 2)  # biasanya 1 cukup
+        q_values = range(0, 8)
+    
+        results = []
+        significant_models = []
+    
+        with st.spinner("🔄 Sedang mencari kombinasi ARIMA terbaik..."):
+            for p in p_values:
+                for d in d_values:
+                    for q in q_values:
+                        try:
+                            # Fit ARIMA model
+                            model = ARIMA(y_train, order=(p, d, q))
+                            model_fit = model.fit()
+    
+                            # Ambil p-value dari hasil model
+                            pvalues = model_fit.pvalues
+    
+                            # Cek jika semua p-value < 0.05
+                            if all(pv < 0.05 for pv in pvalues):
+                                significant_models.append({
+                                    'Order (p,d,q)': (p, d, q),
+                                    'AIC': model_fit.aic,
+                                    'p-values': pvalues,
+                                    'Summary': model_fit.summary()
+                                })
+    
+                            # Simpan semua hasil
+                            results.append({
+                                'Order (p,d,q)': (p, d, q),
+                                'AIC': model_fit.aic,
+                                'p-values': pvalues,
+                                'Summary': model_fit.summary()
+                            })
+    
+                        except Exception as e:
+                            st.write(f"⚠️ Error pada ARIMA({p},{d},{q}): {e}")
+                            continue
+    
+        # === Tampilkan hasil model signifikan ===
+        if significant_models:
+            summary_df = pd.DataFrame({
+                'Order (p,d,q)': [m['Order (p,d,q)'] for m in significant_models],
+                'AIC': [m['AIC'] for m in significant_models]
+            }).sort_values(by='AIC').reset_index(drop=True)
+    
+            st.success("📌 Model yang signifikan berdasarkan p-value < 0.05:")
+            st.dataframe(summary_df)
+    
+            # Simpan model terbaik berdasarkan AIC
+            best_model = significant_models[0]
+            best_order = best_model['Order (p,d,q)']
+            st.markdown(f"**Model ARIMA terbaik:** {best_order} (AIC: {best_model['AIC']:.2f})")
+    
+            # Expand untuk lihat ringkasan detail
+            with st.expander("📄 Lihat Summary Model Terbaik"):
+                st.text(best_model['Summary'])
+    
+        else:
+            st.warning("❌ Tidak ada model yang semua p-valunya < 0.05.")
 
     # -------------------
     # TAB : ARIMAX
