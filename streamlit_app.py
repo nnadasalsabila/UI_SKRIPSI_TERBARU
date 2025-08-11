@@ -220,7 +220,7 @@ if uploaded_file:
                     for d_val in d:
                         for q_val in q:
                             try:
-                                model = ARIMA(y_train_arima, order=(p, d, q))
+                                model = ARIMA(y_train_arima, order=(p_val, d_val, q_val))
                                 model_fit = model.fit()
     
                                 pvalues = model_fit.pvalues
@@ -228,7 +228,7 @@ if uploaded_file:
                                 # Simpan model yang signifikan
                                 if all(pv < 0.05 for pv in pvalues):
                                     significant_models.append({
-                                        'Order (p,d,q)': (p, d, q),
+                                        'Order (p,d,q)': (p_val, d_val, q_val),
                                         'AIC': model_fit.aic,
                                         'p-values': pvalues,
                                         'Summary': model_fit.summary(),
