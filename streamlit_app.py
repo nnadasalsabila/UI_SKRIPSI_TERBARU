@@ -189,13 +189,26 @@ if uploaded_file:
         import pandas as pd
     
         # Input parameter range manual
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
-            p_max = st.number_input("Maksimum p (ARIMA)", min_value=0, max_value=10, value=4, key="arima_p_max")
+            p_start = st.number_input("P mulai dari", min_value=0, max_value=10, value=0, key="arima_p_start")
+            p_end = st.number_input("P sampai", min_value=p_start+1, max_value=10, value=5, key="arima_p_end")
         with col2:
-            d_max = st.number_input("Maksimum d (ARIMA)", min_value=0, max_value=2, value=1, key="arima_d_max")
+            d_start = st.number_input("D mulai dari", min_value=0, max_value=2, value=1, key="arima_d_start")
+            d_end = st.number_input("D sampai", min_value=d_start+1, max_value=2, value=2, key="arima_d_end")
+        col3, col4 = st.columns(2)
         with col3:
-            q_max = st.number_input("Maksimum q (ARIMA)", min_value=0, max_value=10, value=7, key="arima_q_max")
+            q_start = st.number_input("Q mulai dari", min_value=0, max_value=10, value=0, key="arima_q_start")
+            q_end = st.number_input("Q sampai", min_value=q_start+1, max_value=10, value=8, key="arima_q_end")
+        
+        # Buat range berdasarkan input
+        p_values = range(p_start, p_end)
+        d_values = range(d_start, d_end)
+        q_values = range(q_start, q_end)
+        
+        st.write(f"📌 Rentang P: {list(p_values)}")
+        st.write(f"📌 Rentang D: {list(d_values)}")
+        st.write(f"📌 Rentang Q: {list(q_values)}")
 
       
         # Inisialisasi variabel agar tidak NameError di tab berikutnya
