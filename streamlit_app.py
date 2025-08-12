@@ -306,19 +306,24 @@ if uploaded_file:
             # -------------------
             # Uji Goldfeld-Quandt (Heteroskedastisitas)
             # -------------------
-            x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)  # variabel prediktor dummy (waktu)
-            x_dummy_const = add_constant(x_dummy)  # tambahkan konstanta
-            
-            gq_stat, gq_p_value, _ = het_goldfeldquandt(y_train_arima, x_dummy_const)
-            
-            st.write("**Goldfeld-Quandt Test**")
-            st.write(f"Statistik GQ: {gq_stat:.8f}")
-            st.write(f"P-value     : {gq_p_value:.8f}")
-            if gq_p_value <= 0.05:
-                st.error("Ada heteroskedastisitas (tolak H0).")
+            try:
+                y_train_for_gq = arima_y_train  # ganti sesuai variabel data latih ARIMA di script
+            except NameError:
+                st.error("Variabel arima_y_train tidak ditemukan. Pastikan sudah didefinisikan sebelum pengujian GQ.")
             else:
-                st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
-  
+                x_dummy = np.arange(len(y_train_for_gq)).reshape(-1, 1)  # prediktor dummy (waktu)
+                x_dummy_const = add_constant(x_dummy)  # tambahkan konstanta
+            
+                gq_stat, gq_p_value, _ = het_goldfeldquandt(y_train_for_gq, x_dummy_const)
+            
+                st.write("**Goldfeld-Quandt Test**")
+                st.write(f"Statistik GQ: {gq_stat:.8f}")
+                st.write(f"P-value     : {gq_p_value:.8f}")
+                if gq_p_value <= 0.05:
+                    st.error("Ada heteroskedastisitas (tolak H0).")
+                else:
+                    st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
+    
     # -------------------
     # TAB : ARIMAX
     # -------------------
