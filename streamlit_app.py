@@ -272,6 +272,36 @@ if uploaded_file:
             else:
                 st.warning("❌ Tidak ada model signifikan (p-value < 0.05).")
 
+                # -------------------
+                # Uji Diagnostik Model ARIMA
+                # -------------------
+                st.subheader("Uji Diagnostik Model Terbaik")
+                from scipy import stats
+                from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
+                from statsmodels.tools.tools import add_constant
+    
+                residual = pd.DataFrame(best_model.resid)
+    
+                # Uji KS
+                ks_stat, ks_p_value = stats.kstest(best_model.resid, 'norm', args=(0, 1))
+                st.write(f"**Kolmogorov-Smirnov Test**")
+                st.write(f"Statistik KS: {ks_stat:.8f}")
+                st.write(f"P-value     : {ks_p_value:.8f}")
+                if ks_p_value > 0.05:
+                    st.success("Residual terdistribusi normal (gagal menolak H0).")
+                else:
+                    st.error("Residual tidak terdistribusi normal (menolak H0).")
+    
+                # Uji White Noise - Ljung Box
+                ljung_box_result = acorr_ljungbox(residual, lags=[10,20,30,40], return_df=True)
+                st.write("**Ljung-Box Test**")
+                st.dataframe(ljung_box_result)
+                ljung_box_p_value = ljung_box_result['lb_pvalue'].iloc[0]
+                if ljung_box_p_value > 0.05:
+                    st.success("Residual adalah White Noise (gagal menolak H0).")
+                else:
+                    st.error("Residual bukan White Noise (menolak H0).")
+  
     # -------------------
     # TAB : ARIMAX
     # -------------------
