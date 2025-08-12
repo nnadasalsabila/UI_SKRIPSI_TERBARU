@@ -280,10 +280,10 @@ if uploaded_file:
                 from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
                 from statsmodels.tools.tools import add_constant
     
-                residual = pd.DataFrame(best_model.resid)
+                residual = pd.DataFrame(arima_best_model.resid)
     
                 # Uji KS
-                ks_stat, ks_p_value = stats.kstest(best_model.resid, 'norm', args=(0, 1))
+                ks_stat, ks_p_value = stats.kstest(arima_best_model.resid, 'norm', args=(0, 1))
                 st.write(f"**Kolmogorov-Smirnov Test**")
                 st.write(f"Statistik KS: {ks_stat:.8f}")
                 st.write(f"P-value     : {ks_p_value:.8f}")
