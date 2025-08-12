@@ -237,7 +237,7 @@ if uploaded_file:
     
                                 # Simpan semua model
                                 results.append({
-                                    'Order (p,d,q)': (p, d, q),
+                                    'Order (p,d,q)': (p_val, d_val, q_val),
                                     'AIC': model_fit.aic,
                                     'p-values': pvalues,
                                     'Summary': model_fit.summary(),
@@ -260,47 +260,48 @@ if uploaded_file:
     
                 # Ambil model dengan AIC terkecil
                 best_model_info = min(significant_models, key=lambda x: x['AIC'])
-                arima_best_model = best_model_info['ModelFit']
-                arima_best_order = best_model_info['Order (p,d,q)']
-                arima_best_aic = best_model_info['AIC']
-    
-                st.markdown(f"**Model ARIMA terbaik:** {arima_best_order} (AIC: {arima_best_aic:.2f})")
-    
-                with st.expander("📄 Lihat Summary Model Terbaik"):
-                    st.text(best_model_info['Summary'])
-    
             else:
-                st.warning("❌ Tidak ada model signifikan (p-value < 0.05).")
-
-                # -------------------
-                # Uji Diagnostik Model ARIMA
-                # -------------------
-                st.subheader("Uji Diagnostik Model Terbaik")
-                from scipy import stats
-                from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
-                from statsmodels.tools.tools import add_constant
+                st.warning("❌ Tidak ada model signifikan. Memilih model dengan AIC terkecil dari semua hasil.")
+                best_model_info = min(results, key=lambda x: x['AIC'])
+              
+            # Simpan best model
+            arima_best_model = best_model_info['ModelFit']
+            arima_best_order = best_model_info['Order (p,d,q)']
+            arima_best_aic = best_model_info['AIC']
     
-                residual = pd.DataFrame(arima_best_model.resid)
+            st.markdown(f"**Model ARIMA terbaik:** {arima_best_order} (AIC: {arima_best_aic:.2f})")
     
-                # Uji KS
-                ks_stat, ks_p_value = stats.kstest(arima_best_model.resid, 'norm', args=(0, 1))
-                st.write(f"**Kolmogorov-Smirnov Test**")
-                st.write(f"Statistik KS: {ks_stat:.8f}")
-                st.write(f"P-value     : {ks_p_value:.8f}")
-                if ks_p_value > 0.05:
-                    st.success("Residual terdistribusi normal (gagal menolak H0).")
-                else:
-                    st.error("Residual tidak terdistribusi normal (menolak H0).")
+            with st.expander("📄 Lihat Summary Model Terbaik"):
+                st.text(best_model_info['Summary'])
     
-                # Uji White Noise - Ljung Box
-                ljung_box_result = acorr_ljungbox(residual, lags=[10,20,30,40], return_df=True)
-                st.write("**Ljung-Box Test**")
-                st.dataframe(ljung_box_result)
-                ljung_box_p_value = ljung_box_result['lb_pvalue'].iloc[0]
-                if ljung_box_p_value > 0.05:
-                    st.success("Residual adalah White Noise (gagal menolak H0).")
-                else:
-                    st.error("Residual bukan White Noise (menolak H0).")
+            # -------------------
+            # Uji Diagnostik Model ARIMA
+            # -------------------
+            st.subheader("Uji Diagnostik Model Terbaik")
+            from scipy import stats
+            from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
+            from statsmodels.tools.tools import add_constant
+    
+            residual = pd.DataFrame(arima_best_model.resid)
+    
+            # Uji KS
+            ks_stat, ks_p_value = stats.kstest(arima_best_model.resid, 'norm', args=(0, 1))
+            st.write(f"**Kolmogorov-Smirnov Test**")
+            st.write(f"Statistik KS: {ks_stat:.8f}")
+            st.write(f"P-value     : {ks_p_value:.8f}")
+            if ks_p_value > 0.05:
+                st.success("Residual terdistribusi normal (gagal menolak H0).")
+            else:
+                st.error("Residual tidak terdistribusi normal (menolak H0).")
+    
+            # Uji White Noise - Ljung Box
+            ljung_box_result = acorr_ljungbox(residual, lags=[10, 20, 30, 40], return_df=True)
+            st.write("**Ljung-Box Test**")
+            st.dataframe(ljung_box_result)
+            if (ljung_box_result['lb_pvalue'] > 0.05).all():
+                st.success("Residual adalah White Noise (gagal menolak H0).")
+            else:
+                st.error("Residual bukan White Noise (menolak H0).")
   
     # -------------------
     # TAB : ARIMAX
