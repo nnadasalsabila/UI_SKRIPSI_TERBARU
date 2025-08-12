@@ -302,6 +302,22 @@ if uploaded_file:
                 st.success("Residual adalah White Noise (gagal menolak H0).")
             else:
                 st.error("Residual bukan White Noise (menolak H0).")
+            
+            # -------------------
+            # Uji Goldfeld-Quandt (Heteroskedastisitas)
+            # -------------------
+            x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)  # variabel prediktor dummy (waktu)
+            x_dummy_const = add_constant(x_dummy)  # tambahkan konstanta
+            
+            gq_stat, gq_p_value, _ = het_goldfeldquandt(y_train_arima, x_dummy_const)
+            
+            st.write("**Goldfeld-Quandt Test**")
+            st.write(f"Statistik GQ: {gq_stat:.8f}")
+            st.write(f"P-value     : {gq_p_value:.8f}")
+            if gq_p_value <= 0.05:
+                st.error("Ada heteroskedastisitas (tolak H0).")
+            else:
+                st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
   
     # -------------------
     # TAB : ARIMAX
