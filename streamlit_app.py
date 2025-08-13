@@ -61,89 +61,89 @@ elif menu == "📊 Pemodelan & Prediksi":
             ["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"]
         )
 
-# ===== TAB DATA =====
-with tab_data:
-    if 'data' in locals() and data is not None and not data.empty:
-        st.subheader("Data Awal")
-        st.dataframe(data)
-
-        st.subheader("Cek Missing Value")
-        missing_values = data.isnull().sum()
-        if missing_values.sum() == 0:
-            st.success("Data tidak memiliki missing value")
-        else:
-            st.write(missing_values)
-
-        st.subheader("Data Visualisasi")
-        fig, ax = plt.subplots(figsize=(12, 6))
-        if "Harga" in data.columns:
-            ax.plot(data.index, data["Harga"])
-            ax.set_ylabel("Harga")
-        else:
-            st.warning("Kolom 'Harga' tidak ditemukan di data.")
-        ax.set_xlabel("Tanggal")
-        ax.set_title("Grafik Harga Cabai Keriting di Jawa Timur")
-        ax.grid(True)
-        st.pyplot(fig)
-
-        st.subheader("Statistik Deskriptif Harga per Tahun")
-        if "Harga" in data.columns:
-            data_per_tahun = data.copy()
-            data_per_tahun["Tahun"] = data_per_tahun.index.to_period("Y")
-            statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
-            st.dataframe(statistik)
-        else:
-            st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
-    else:
-        st.info("Silakan unggah data terlebih dahulu untuk melihat isi tab ini.")
-
-# -------------------
-# TAB 2: UJI STASIONERITAS
-# -------------------
-with tab_stasioneritas:
-    if 'data' in locals() and data is not None and not data.empty and "Harga" in data.columns:
-        st.subheader("Uji Stasioneritas - Augmented Dickey-Fuller Test")
-        # --- 1. Uji ADF Awal ---
-        result = adfuller(data["Harga"].dropna())
-        st.write("### Hasil Uji ADF (Data Asli)")
-        st.write(f"Test Statistic: {result[0]:.6f}")
-        st.write(f"p-value: {result[1]:.6f}")
-        st.write(f"# Lags Used: {result[2]}")
-        st.write(f"Number of Observations: {result[3]}")
-        st.write("Critical Values:")
-        for key, value in result[4].items():
-            st.write(f"   {key}: {value:.6f}")
-        if result[1] <= 0.05:
-            st.success("Interpretasi: Data stasioner")
-            data_diff = data["Harga"].diff().dropna()
-        else:
-            st.warning("Interpretasi: Data tidak stasioner, akan dilakukan differencing")
-            # --- 2. Differencing ---
-            data_diff = data["Harga"].diff().dropna()
-            result_diff = adfuller(data_diff.dropna())
-            st.write("### Hasil Uji ADF Setelah Differencing")
-            st.write(f"Test Statistic: {result_diff[0]:.6f}")
-            st.write(f"p-value: {result_diff[1]:.6f}")
-            st.write(f"# Lags Used: {result_diff[2]}")
-            st.write(f"Number of Observations: {result_diff[3]}")
-            st.write("Critical Values:")
-            for key, value in result_diff[4].items():
-                st.write(f"   {key}: {value:.6f}")
-            if result_diff[1] <= 0.05:
-                st.success("Interpretasi: Data sudah stasioner setelah differencing")
+        # ===== TAB DATA =====
+        with tab_data:
+            if 'data' in locals() and data is not None and not data.empty:
+                st.subheader("Data Awal")
+                st.dataframe(data)
+        
+                st.subheader("Cek Missing Value")
+                missing_values = data.isnull().sum()
+                if missing_values.sum() == 0:
+                    st.success("Data tidak memiliki missing value")
+                else:
+                    st.write(missing_values)
+        
+                st.subheader("Data Visualisasi")
+                fig, ax = plt.subplots(figsize=(12, 6))
+                if "Harga" in data.columns:
+                    ax.plot(data.index, data["Harga"])
+                    ax.set_ylabel("Harga")
+                else:
+                    st.warning("Kolom 'Harga' tidak ditemukan di data.")
+                ax.set_xlabel("Tanggal")
+                ax.set_title("Grafik Harga Cabai Keriting di Jawa Timur")
+                ax.grid(True)
+                st.pyplot(fig)
+        
+                st.subheader("Statistik Deskriptif Harga per Tahun")
+                if "Harga" in data.columns:
+                    data_per_tahun = data.copy()
+                    data_per_tahun["Tahun"] = data_per_tahun.index.to_period("Y")
+                    statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
+                    st.dataframe(statistik)
+                else:
+                    st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
             else:
-                st.error("Interpretasi: Data masih belum stasioner setelah differencing")
-
-        # --- 3. Plot ACF dan PACF ---
-        st.subheader("Plot ACF & PACF (Setelah Differencing)")
-        fig, axes = plt.subplots(1, 2, figsize=(16, 4))
-        plot_acf(data_diff, lags=20, ax=axes[0])
-        axes[0].set_title("ACF - Setelah Differencing")
-        plot_pacf(data_diff, lags=20, ax=axes[1])
-        axes[1].set_title("PACF - Setelah Differencing")
-        st.pyplot(fig)
-    else:
-        st.info("Silakan unggah data terlebih dahulu untuk melakukan uji stasioneritas.")
+                st.info("Silakan unggah data terlebih dahulu untuk melihat isi tab ini.")
+        
+        # -------------------
+        # TAB 2: UJI STASIONERITAS
+        # -------------------
+        with tab_stasioneritas:
+            if 'data' in locals() and data is not None and not data.empty and "Harga" in data.columns:
+                st.subheader("Uji Stasioneritas - Augmented Dickey-Fuller Test")
+                # --- 1. Uji ADF Awal ---
+                result = adfuller(data["Harga"].dropna())
+                st.write("### Hasil Uji ADF (Data Asli)")
+                st.write(f"Test Statistic: {result[0]:.6f}")
+                st.write(f"p-value: {result[1]:.6f}")
+                st.write(f"# Lags Used: {result[2]}")
+                st.write(f"Number of Observations: {result[3]}")
+                st.write("Critical Values:")
+                for key, value in result[4].items():
+                    st.write(f"   {key}: {value:.6f}")
+                if result[1] <= 0.05:
+                    st.success("Interpretasi: Data stasioner")
+                    data_diff = data["Harga"].diff().dropna()
+                else:
+                    st.warning("Interpretasi: Data tidak stasioner, akan dilakukan differencing")
+                    # --- 2. Differencing ---
+                    data_diff = data["Harga"].diff().dropna()
+                    result_diff = adfuller(data_diff.dropna())
+                    st.write("### Hasil Uji ADF Setelah Differencing")
+                    st.write(f"Test Statistic: {result_diff[0]:.6f}")
+                    st.write(f"p-value: {result_diff[1]:.6f}")
+                    st.write(f"# Lags Used: {result_diff[2]}")
+                    st.write(f"Number of Observations: {result_diff[3]}")
+                    st.write("Critical Values:")
+                    for key, value in result_diff[4].items():
+                        st.write(f"   {key}: {value:.6f}")
+                    if result_diff[1] <= 0.05:
+                        st.success("Interpretasi: Data sudah stasioner setelah differencing")
+                    else:
+                        st.error("Interpretasi: Data masih belum stasioner setelah differencing")
+        
+                # --- 3. Plot ACF dan PACF ---
+                st.subheader("Plot ACF & PACF (Setelah Differencing)")
+                fig, axes = plt.subplots(1, 2, figsize=(16, 4))
+                plot_acf(data_diff, lags=20, ax=axes[0])
+                axes[0].set_title("ACF - Setelah Differencing")
+                plot_pacf(data_diff, lags=20, ax=axes[1])
+                axes[1].set_title("PACF - Setelah Differencing")
+                st.pyplot(fig)
+            else:
+                st.info("Silakan unggah data terlebih dahulu untuk melakukan uji stasioneritas.")
 
 
     # -------------------
