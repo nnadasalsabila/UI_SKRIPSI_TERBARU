@@ -314,7 +314,7 @@ if uploaded_file:
                 st.error("Residual bukan White Noise (menolak H0).")
             
             # Uji Goldfeld-Quandt (Heteroskedastisitas)   
-            gq_test_arima = het_goldfeldquandt(y_train_arima, x_dummy_const)
+            gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
             
             st.write("**Goldfeld-Quandt Test**")
             st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
@@ -334,15 +334,25 @@ if uploaded_file:
         from statsmodels.tsa.statespace.sarimax import SARIMAX
         import pandas as pd
     
-        # Input parameter range
-        col1, col2, col3 = st.columns(3)
+        # === Input parameter dalam range ===
+        col1, col2 = st.columns(2)
         with col1:
-            p_max = st.number_input("Maksimum p", min_value=0, max_value=10, value=4)
+            p_start = st.number_input("P mulai dari", min_value=0, max_value=10, value=0, key="arimax_p_start")
+            p_end = st.number_input("P sampai", min_value=p_start+1, max_value=10, value=5, key="arimax_p_end")
         with col2:
-            d_max = st.number_input("Maksimum d", min_value=0, max_value=2, value=1)
-        with col3:
-            q_max = st.number_input("Maksimum q", min_value=0, max_value=10, value=7)
+            d_start = st.number_input("D mulai dari", min_value=0, max_value=2, value=1, key="arimax_d_start")
+            d_end = st.number_input("D sampai", min_value=d_start+1, max_value=2, value=2, key="arimax_d_end")
     
+        col3, col4 = st.columns(2)
+        with col3:
+            q_start = st.number_input("Q mulai dari", min_value=0, max_value=10, value=0, key="arimax_q_start")
+            q_end = st.number_input("Q sampai", min_value=q_start+1, max_value=10, value=7, key="arimax_q_end")
+
+        # Buat range berdasarkan input
+        p_range = range(p_start, p_end)
+        d_range = range(d_start, d_end)
+        q_range = range(q_start, q_end)
+
         # Inisialisasi agar tidak NameError di tab berikutnya
         best_model = None
         best_order = None
@@ -354,9 +364,9 @@ if uploaded_file:
             best_result = None  # untuk menyimpan model terbaik
     
             with st.spinner("Sedang melakukan fitting model ARIMAX..."):
-                for p in range(0, p_max + 1):
-                    for d in range(0, d_max + 1):
-                        for q in range(0, q_max + 1):
+                for p in p_range:
+                    for d in d_range:
+                        for q in q_range:
                             try:
                                 model = SARIMAX(y_train, order=(p, d, q), exog=x_train)
                                 model_fit = model.fit(disp=False)
@@ -395,13 +405,17 @@ if uploaded_file:
     
                 # Ambil model terbaik
                 best_model_info = min(significant_models, key=lambda x: x['AIC'])
-                best_model = best_model_info['ModelFit']
-                best_order = best_model_info['Order (p,d,q)']
-                best_aic = best_model_info['AIC']
-                best_result = best_model
-    
-                st.write(f"### Model terbaik: ARIMAX{best_order}")
-                st.write(f"**AIC:** {best_aic}")
+            else:
+              st.warning("❌ Tidak ada model signifikan. Memilih model dengan AIC terkecil dari semua hasil.")
+              best_model_info = min(results, key=lambda x: x['AIC'])
+               
+            arimax_best_model = best_model_info['ModelFit']
+            arimax_best_order = best_model_info['Order (p,d,q)']
+            arimax_best_aic = best_model_info['AIC']
+            
+            st.markdown(f"**Model ARIMAX terbaik:** {arimax_best_order} (AIC: {arimax_best_aic:.2f})")
+
+            with st.expander("📄 Lihat Summary Model Terbaik"):
                 st.text(best_model_info['Summary'])
     
                 # -------------------
@@ -412,10 +426,10 @@ if uploaded_file:
                 from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
                 from statsmodels.tools.tools import add_constant
     
-                residual = pd.DataFrame(best_result.resid)
+                residual = pd.DataFrame(arimax_best_model.resid)
     
                 # Uji KS
-                ks_stat, ks_p_value = stats.kstest(best_result.resid, 'norm', args=(0, 1))
+                ks_stat, ks_p_value = stats.kstest(arimax_best_model.resid, 'norm', args=(0, 1))
                 st.write(f"**Kolmogorov-Smirnov Test**")
                 st.write(f"Statistik KS: {ks_stat:.8f}")
                 st.write(f"P-value     : {ks_p_value:.8f}")
