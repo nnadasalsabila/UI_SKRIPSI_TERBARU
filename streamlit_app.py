@@ -61,45 +61,48 @@ elif menu == "📊 Pemodelan & Prediksi":
             ["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"]
         )
 
-        # ===== TAB DATA =====
-        with tab_data:
-          st.subheader("Data Awal")
-          st.dataframe(data)
-  
-          st.subheader("Cek Missing Value")
-          missing_values = data.isnull().sum()
-          if missing_values.sum() == 0:
-              st.success("Data tidak memiliki missing value")
-          else:
-              st.write(missing_values)
-  
-          st.subheader("Data Visualisasi")
-          fig, ax = plt.subplots(figsize=(12, 6))
-          if "Harga" in data.columns:
-              ax.plot(data.index, data["Harga"])
-              ax.set_ylabel("Harga")
-          else:
-              st.warning("Kolom 'Harga' tidak ditemukan di data.")
-          ax.set_xlabel("Tanggal")
-          ax.set_title("Grafik Harga Cabai Keriting di Jawa Timur")
-          ax.grid(True)
-          st.pyplot(fig)
-  
-          st.subheader("Statistik Deskriptif Harga per Tahun")
-          if "Harga" in data.columns:
-              data_per_tahun = data.copy()
-              data_per_tahun["Tahun"] = data_per_tahun.index.to_period("Y")
-              statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
-              st.dataframe(statistik)
-          else:
-              st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
+# ===== TAB DATA =====
+with tab_data:
+    if 'data' in locals() and data is not None and not data.empty:
+        st.subheader("Data Awal")
+        st.dataframe(data)
 
-    # -------------------
-    # TAB 2: UJI STASIONERITAS
-    # -------------------
-    with tab_stasioneritas:
+        st.subheader("Cek Missing Value")
+        missing_values = data.isnull().sum()
+        if missing_values.sum() == 0:
+            st.success("Data tidak memiliki missing value")
+        else:
+            st.write(missing_values)
+
+        st.subheader("Data Visualisasi")
+        fig, ax = plt.subplots(figsize=(12, 6))
+        if "Harga" in data.columns:
+            ax.plot(data.index, data["Harga"])
+            ax.set_ylabel("Harga")
+        else:
+            st.warning("Kolom 'Harga' tidak ditemukan di data.")
+        ax.set_xlabel("Tanggal")
+        ax.set_title("Grafik Harga Cabai Keriting di Jawa Timur")
+        ax.grid(True)
+        st.pyplot(fig)
+
+        st.subheader("Statistik Deskriptif Harga per Tahun")
+        if "Harga" in data.columns:
+            data_per_tahun = data.copy()
+            data_per_tahun["Tahun"] = data_per_tahun.index.to_period("Y")
+            statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
+            st.dataframe(statistik)
+        else:
+            st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
+    else:
+        st.info("Silakan unggah data terlebih dahulu untuk melihat isi tab ini.")
+
+# -------------------
+# TAB 2: UJI STASIONERITAS
+# -------------------
+with tab_stasioneritas:
+    if 'data' in locals() and data is not None and not data.empty and "Harga" in data.columns:
         st.subheader("Uji Stasioneritas - Augmented Dickey-Fuller Test")
-    
         # --- 1. Uji ADF Awal ---
         result = adfuller(data["Harga"].dropna())
         st.write("### Hasil Uji ADF (Data Asli)")
@@ -112,7 +115,7 @@ elif menu == "📊 Pemodelan & Prediksi":
             st.write(f"   {key}: {value:.6f}")
         if result[1] <= 0.05:
             st.success("Interpretasi: Data stasioner")
-            data_diff = data["Harga"].diff().dropna()  # tetap buat differencing agar ada untuk ACF/PACF
+            data_diff = data["Harga"].diff().dropna()
         else:
             st.warning("Interpretasi: Data tidak stasioner, akan dilakukan differencing")
             # --- 2. Differencing ---
@@ -130,7 +133,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                 st.success("Interpretasi: Data sudah stasioner setelah differencing")
             else:
                 st.error("Interpretasi: Data masih belum stasioner setelah differencing")
-    
+
         # --- 3. Plot ACF dan PACF ---
         st.subheader("Plot ACF & PACF (Setelah Differencing)")
         fig, axes = plt.subplots(1, 2, figsize=(16, 4))
@@ -139,6 +142,9 @@ elif menu == "📊 Pemodelan & Prediksi":
         plot_pacf(data_diff, lags=20, ax=axes[1])
         axes[1].set_title("PACF - Setelah Differencing")
         st.pyplot(fig)
+    else:
+        st.info("Silakan unggah data terlebih dahulu untuk melakukan uji stasioneritas.")
+
 
     # -------------------
     # TAB : SPLITTING DATA
