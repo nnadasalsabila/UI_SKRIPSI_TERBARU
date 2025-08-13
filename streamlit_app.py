@@ -13,41 +13,66 @@ from statsmodels.tsa.arima.model import ARIMA
 st.set_page_config(page_title="Dashboard Prediksi Harga Cabai",
                    page_icon="🌶️",
                    layout="wide")
-
 # -------------------
-# 2. TITLE
-# -------------------
-st.title("🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur")
-st.markdown("Upload data, lakukan analisis, uji stasioneritas, dan buat model ARIMAX dengan variabel dummy hari besar keagamaan.")
-
-# -------------------
-# 3. SIDEBAR MENU
+# 2. SIDEBAR MENU
 # -------------------
 import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
+menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Analisis & Model"])
+# -------------------
+# 3. HALAMAN HOME
+# -------------------
+if menu == "🏠 Homepage":
+    st.title("🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur")
+    st.markdown("""
+    ## Tentang Aplikasi
+    Aplikasi ini digunakan untuk:
+    - Mengunggah data harga cabai harian di Jawa Timur.
+    - Melakukan analisis stasioneritas data.
+    - Membangun model **ARIMAX** dengan variabel dummy hari besar keagamaan.
+    - Membuat prediksi harga untuk beberapa hari ke depan.
 
-st.sidebar.header("📂 Upload Data")
-uploaded_file = st.sidebar.file_uploader("Upload file CSV/Excel", type=["csv", "xlsx"])
+    ### Tujuan
+    Memberikan prediksi harga cabai yang akurat untuk membantu petani, pedagang, dan pengambil kebijakan.
 
-if uploaded_file:
-    # Baca file
-    if uploaded_file.name.endswith(".csv"):
-        data = pd.read_csv(uploaded_file)
-    else:
-        data = pd.read_excel(uploaded_file)
+    ### Fitur
+    1. **Upload Data**: Unggah file CSV atau Excel berisi harga harian.
+    2. **Uji Stasioneritas**: Periksa kestabilan data sebelum pemodelan.
+    3. **Model ARIMAX**: Pemodelan dengan variabel dummy hari besar.
+    4. **Prediksi & Evaluasi**: Prediksi harga ke depan dan uji akurasinya.
 
-    # Pastikan kolom tanggal ada dan jadi index
-    data.columns = data.columns.str.strip()  # bersihkan spasi
-    if 'Tanggal' in data.columns:
-        data['Tanggal'] = pd.to_datetime(data['Tanggal'], errors='coerce')
-        data.set_index('Tanggal', inplace=True)
-    elif 'date' in data.columns:
-        data['date'] = pd.to_datetime(data['date'], errors='coerce')
-        data.set_index('date', inplace=True)
-    else:
-        st.error("Kolom tanggal tidak ditemukan!")
-        st.stop()
+    ---
+    **Catatan**: Pastikan kolom tanggal bernama `Tanggal` atau `date` pada file yang diunggah.
+    """)
+    st.image("https://upload.wikimedia.org/wikipedia/commons/f/f7/Chili_peppers.jpg", caption="Cabai Merah Segar", use_column_width=True)
+# -------------------
+# 4. HALAMAN ANALISIS
+# -------------------
+elif menu == "📊 Analisis & Model":
+    st.header("📂 Upload Data")
+    uploaded_file = st.file_uploader("Upload file CSV/Excel", type=["csv", "xlsx"])
+    
+    if uploaded_file:
+        # Baca file
+        if uploaded_file.name.endswith(".csv"):
+            data = pd.read_csv(uploaded_file)
+        else:
+            data = pd.read_excel(uploaded_file)
+
+        # Pastikan kolom tanggal ada dan jadi index
+        data.columns = data.columns.str.strip()
+        if 'Tanggal' in data.columns:
+            data['Tanggal'] = pd.to_datetime(data['Tanggal'], errors='coerce')
+            data.set_index('Tanggal', inplace=True)
+        elif 'date' in data.columns:
+            data['date'] = pd.to_datetime(data['date'], errors='coerce')
+            data.set_index('date', inplace=True)
+        else:
+            st.error("Kolom tanggal tidak ditemukan!")
+            st.stop()
+
+        st.dataframe(data.head())
 
     # Tab Data
     tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"])
