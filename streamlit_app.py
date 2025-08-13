@@ -180,7 +180,7 @@ if uploaded_file:
       
         # Tampilkan hasil ke Streamlit
         st.write("Jumlah data y_train:", len(y_train_arima))
-        st.write("Jumlah data y_test :", len(y_train_arima))
+        st.write("Jumlah data y_test :", len(y_test_arima))
 
     with tab_arima:
         st.header("🔍 Pencarian Model ARIMA Terbaik")
@@ -245,7 +245,7 @@ if uploaded_file:
                                 })
     
                             except Exception as e:
-                                st.write(f"⚠️ Error pada ARIMA({p},{d},{q}): {e}")
+                                st.write(f"⚠️ Error pada ARIMA({p_val},{d_val},{q_val}): {e}")
                                 continue
     
             # Tampilkan hasil model signifikan
@@ -281,6 +281,7 @@ if uploaded_file:
             from scipy import stats
             from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
             from statsmodels.tools.tools import add_constant
+            import numpy as np
 
             # Pastikan y_train_arima selalu ada
             if 'y_train_arima' not in locals():
@@ -291,7 +292,7 @@ if uploaded_file:
             x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
             x_dummy_const = add_constant(x_dummy)
     
-            residual_arima = (arima_best_model.resid)
+            residual_arima = pd.DataFrame(arima_best_model.resid)
     
             # Uji KS
             ks_stat, ks_p_value = stats.kstest(residual_arima.resid, 'norm', args=(0, 1))
