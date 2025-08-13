@@ -33,7 +33,7 @@ if menu == "🏠 Homepage":
 # -------------------
 # 4. HALAMAN ANALISIS
 # -------------------
-elif menu == "📊 Analisis & Model":
+elif menu == "📊 Pemodelan & Prediksi":
     st.header("📂 Upload Data")
     uploaded_file = st.file_uploader("Upload file CSV/Excel", type=["csv", "xlsx"])
     
