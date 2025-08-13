@@ -1,12 +1,3 @@
-# streamlit_app.py
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from statsmodels.tsa.stattools import adfuller
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from statsmodels.tsa.arima.model import ARIMA
-
 # -------------------
 # 1. PAGE CONFIG
 # -------------------
@@ -27,14 +18,7 @@ if menu == "🏠 Homepage":
     st.title("🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur")
     st.markdown("""
     ## Tentang Aplikasi
-    Aplikasi ini digunakan untuk:
-    - Mengunggah data harga cabai harian di Jawa Timur.
-    - Melakukan analisis stasioneritas data.
-    - Membangun model **ARIMAX** dengan variabel dummy hari besar keagamaan.
-    - Membuat prediksi harga untuk beberapa hari ke depan.
-
-    ### Tujuan
-    Memberikan prediksi harga cabai yang akurat untuk membantu petani, pedagang, dan pengambil kebijakan.
+    Website ini merupakan sistem prediksi harga komoditas cabai untuk membantu pemantauan fluktuasi harga cabai di Jawa Timur. Model prediksi yang digunakan adalah ARIMAX (Autoregressive Integrated Moving Average with Exogenous Variables).
 
     ### Fitur
     1. **Upload Data**: Unggah file CSV atau Excel berisi harga harian.
@@ -72,37 +56,36 @@ elif menu == "📊 Analisis & Model":
             st.error("Kolom tanggal tidak ditemukan!")
             st.stop()
 
-        st.dataframe(data.head())
+        # Buat tab hanya kalau data sudah ada
+        tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(
+            ["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"]
+        )
 
-    # Tab Data
-    tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"])
-  
-    # -------------------
-    # TAB 1: DATA
-    # -------------------
-    with tab_data:
-        st.subheader("Data Awal")
-        st.dataframe(data)
+        with tab_data:
+            st.subheader("Data Awal")
+            st.dataframe(data)
 
-        st.subheader("Cek Missing Value")
-        missing_values = data.isnull().sum()
-        if missing_values.sum() == 0:
-            st.success("Data tidak memiliki missing value")
-        st.write(missing_values)
+            st.subheader("Cek Missing Value")
+            missing_values = data.isnull().sum()
+            if missing_values.sum() == 0:
+                st.success("Data tidak memiliki missing value")
+            st.write(missing_values)
 
-        st.subheader("Data Visualisasi")
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.plot(data.index, data["Harga"])
-        ax.set_xlabel("Tanggal")
-        ax.set_ylabel("Harga")
-        ax.set_title('Grafik Harga Cabai Keriting di Jawa Timur 2021-2024')
-        ax.grid()
-        st.pyplot(fig)
+            st.subheader("Data Visualisasi")
+            fig, ax = plt.subplots(figsize=(12, 6))
+            ax.plot(data.index, data["Harga"])
+            ax.set_xlabel("Tanggal")
+            ax.set_ylabel("Harga")
+            ax.set_title('Grafik Harga Cabai Keriting di Jawa Timur 2021-2024')
+            ax.grid()
+            st.pyplot(fig)
 
-        st.subheader("Statistik Deskriptif Harga per Tahun")
-        data["Tahun"] = data.index.to_period("Y")
-        statistik = data.groupby("Tahun")["Harga"].describe()
-        st.dataframe(statistik)
+            st.subheader("Statistik Deskriptif Harga per Tahun")
+            data["Tahun"] = data.index.to_period("Y")
+            statistik = data.groupby("Tahun")["Harga"].describe()
+            st.dataframe(statistik)
+    else:
+        st.info("Silakan upload file terlebih dahulu.")
 
     # -------------------
     # TAB 2: UJI STASIONERITAS
