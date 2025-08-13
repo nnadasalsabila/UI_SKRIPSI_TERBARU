@@ -1,3 +1,10 @@
+# streamlit_app.py
+import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.arima.model import ARIMA
 # -------------------
 # 1. PAGE CONFIG
 # -------------------
@@ -7,10 +14,7 @@ st.set_page_config(page_title="Dashboard Prediksi Harga Cabai",
 # -------------------
 # 2. SIDEBAR MENU
 # -------------------
-import pandas as pd
-import matplotlib.pyplot as plt
-import streamlit as st
-menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Analisis & Model"])
+menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Pemodelan & Prediksi"])
 # -------------------
 # 3. HALAMAN HOME
 # -------------------
@@ -25,11 +29,7 @@ if menu == "🏠 Homepage":
     2. **Uji Stasioneritas**: Periksa kestabilan data sebelum pemodelan.
     3. **Model ARIMAX**: Pemodelan dengan variabel dummy hari besar.
     4. **Prediksi & Evaluasi**: Prediksi harga ke depan dan uji akurasinya.
-
-    ---
-    **Catatan**: Pastikan kolom tanggal bernama `Tanggal` atau `date` pada file yang diunggah.
     """)
-    st.image("https://upload.wikimedia.org/wikipedia/commons/f/f7/Chili_peppers.jpg", caption="Cabai Merah Segar", use_column_width=True)
 # -------------------
 # 4. HALAMAN ANALISIS
 # -------------------
@@ -61,31 +61,38 @@ elif menu == "📊 Analisis & Model":
             ["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"]
         )
 
+        # ===== TAB DATA =====
         with tab_data:
-            st.subheader("Data Awal")
-            st.dataframe(data)
+        st.subheader("Data Awal")
+        st.dataframe(data)
 
-            st.subheader("Cek Missing Value")
-            missing_values = data.isnull().sum()
-            if missing_values.sum() == 0:
-                st.success("Data tidak memiliki missing value")
+        st.subheader("Cek Missing Value")
+        missing_values = data.isnull().sum()
+        if missing_values.sum() == 0:
+            st.success("Data tidak memiliki missing value")
+        else:
             st.write(missing_values)
 
-            st.subheader("Data Visualisasi")
-            fig, ax = plt.subplots(figsize=(12, 6))
+        st.subheader("Data Visualisasi")
+        fig, ax = plt.subplots(figsize=(12, 6))
+        if "Harga" in data.columns:
             ax.plot(data.index, data["Harga"])
-            ax.set_xlabel("Tanggal")
             ax.set_ylabel("Harga")
-            ax.set_title('Grafik Harga Cabai Keriting di Jawa Timur 2021-2024')
-            ax.grid()
-            st.pyplot(fig)
+        else:
+            st.warning("Kolom 'Harga' tidak ditemukan di data.")
+        ax.set_xlabel("Tanggal")
+        ax.set_title("Grafik Harga Cabai Keriting di Jawa Timur")
+        ax.grid(True)
+        st.pyplot(fig)
 
-            st.subheader("Statistik Deskriptif Harga per Tahun")
-            data["Tahun"] = data.index.to_period("Y")
-            statistik = data.groupby("Tahun")["Harga"].describe()
+        st.subheader("Statistik Deskriptif Harga per Tahun")
+        if "Harga" in data.columns:
+            data_per_tahun = data.copy()
+            data_per_tahun["Tahun"] = data_per_tahun.index.to_period("Y")
+            statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
             st.dataframe(statistik)
-    else:
-        st.info("Silakan upload file terlebih dahulu.")
+        else:
+            st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
 
     # -------------------
     # TAB 2: UJI STASIONERITAS
