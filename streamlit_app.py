@@ -310,15 +310,15 @@ if uploaded_file:
             x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)  # prediktor dummy (waktu)
             x_dummy_const = add_constant(x_dummy)  # tambahkan konstanta
             
-           gq_test_arima = het_goldfeldquandt(residual, x_train_const)
+            gq_test_arima = het_goldfeldquandt(residual, x_train_const)
             
-           st.write("**Goldfeld-Quandt Test**")
-           st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
-           st.write(f"P-value     : {gq_test_arima[1]:.8f}")
-           if gq_test_arima[1] <= 0.05:                   
-             st.error("Ada heteroskedastisitas (tolak H0).")
-           else:
-             st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
+            st.write("**Goldfeld-Quandt Test**")
+            st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
+            st.write(f"P-value     : {gq_test_arima[1]:.8f}")
+            if gq_test_arima[1] <= 0.05:                   
+              st.error("Ada heteroskedastisitas (tolak H0).")
+            else:
+              st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
     
     # -------------------
     # TAB : ARIMAX
