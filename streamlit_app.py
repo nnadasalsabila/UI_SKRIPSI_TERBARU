@@ -295,10 +295,7 @@ if uploaded_file:
             residual_arima = (arima_best_model.resid)
     
             # Uji KS
-            ks_stat, ks_p_value = stats.kstest(
-                (residual_arima - residual_arima.mean()) / residual_arima.std(ddof=1),
-                'norm', args=(0, 1)
-            )
+            ks_stat, ks_p_value = stats.kstest(residual_arima, 'norm', args=(0, 1))
             st.write(f"**Kolmogorov-Smirnov Test**")
             st.write(f"Statistik KS: {ks_stat:.8f}")
             st.write(f"P-value     : {ks_p_value:.8f}")
@@ -316,11 +313,8 @@ if uploaded_file:
             else:
                 st.error("Residual bukan White Noise (menolak H0).")
             
-            # -------------------
-            # Uji Goldfeld-Quandt (Heteroskedastisitas)
-            # -------------------
-                  
-            gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
+            # Uji Goldfeld-Quandt (Heteroskedastisitas)   
+            gq_test_arima = het_goldfeldquandt(y_train_arima, x_dummy_const)
             
             st.write("**Goldfeld-Quandt Test**")
             st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
