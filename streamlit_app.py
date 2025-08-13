@@ -194,8 +194,8 @@ if uploaded_file:
             p_start = st.number_input("P mulai dari", min_value=0, max_value=10, value=0, key="arima_p_start")
             p_end = st.number_input("P sampai", min_value=p_start+1, max_value=10, value=5, key="arima_p_end")
         with col2:
-            d_start = st.number_input("D mulai dari", min_value=0, max_value=2, value=1, key="arima_d_start")
-            d_end = st.number_input("D sampai", min_value=d_start+1, max_value=2, value=2, key="arima_d_end")
+            d_start = st.number_input("D mulai dari", min_value=0, max_value=4, value=1, key="arima_d_start")
+            d_end = st.number_input("D sampai", min_value=d_start+1, max_value=4, value=2, key="arima_d_end")
         col3, col4 = st.columns(2)
         with col3:
             q_start = st.number_input("Q mulai dari", min_value=0, max_value=10, value=0, key="arima_q_start")
@@ -340,8 +340,8 @@ if uploaded_file:
             p_start = st.number_input("P mulai dari", min_value=0, max_value=10, value=0, key="arimax_p_start")
             p_end = st.number_input("P sampai", min_value=p_start+1, max_value=10, value=5, key="arimax_p_end")
         with col2:
-            d_start = st.number_input("D mulai dari", min_value=0, max_value=2, value=1, key="arimax_d_start")
-            d_end = st.number_input("D sampai", min_value=d_start+1, max_value=2, value=2, key="arimax_d_end")
+            d_start = st.number_input("D mulai dari", min_value=0, max_value=4, value=1, key="arimax_d_start")
+            d_end = st.number_input("D sampai", min_value=d_start+1, max_value=4, value=2, key="arimax_d_end")
     
         col3, col4 = st.columns(2)
         with col3:
