@@ -282,14 +282,19 @@ if uploaded_file:
             from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
             from statsmodels.tools.tools import add_constant
 
-            # GQ Test Konstanta
+            # Pastikan y_train_arima selalu ada
+            if 'y_train_arima' not in locals():
+                split_date = '2024-12-26'
+                y_train_arima = data['Harga'].loc[data.index < split_date]
+
+            # Buat variabel prediktor waktu (dummy)
             x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
             x_dummy_const = add_constant(x_dummy)
     
-            residual_arima = pd.DataFrame(arima_best_model.resid)
+            residual_arima = (arima_best_model.resid)
     
             # Uji KS
-            ks_stat, ks_p_value = stats.kstest(arima_best_model.resid, 'norm', args=(0, 1))
+            ks_stat, ks_p_value = stats.kstest(residual_arima.resid, 'norm', args=(0, 1))
             st.write(f"**Kolmogorov-Smirnov Test**")
             st.write(f"Statistik KS: {ks_stat:.8f}")
             st.write(f"P-value     : {ks_p_value:.8f}")
@@ -311,7 +316,7 @@ if uploaded_file:
             # Uji Goldfeld-Quandt (Heteroskedastisitas)
             # -------------------
                   
-            gq_test_arima = het_goldfeldquandt(residual, x_dummy_const)
+            gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
             
             st.write("**Goldfeld-Quandt Test**")
             st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
