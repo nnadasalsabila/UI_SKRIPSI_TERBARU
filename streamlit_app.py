@@ -63,36 +63,36 @@ elif menu == "📊 Analisis & Model":
 
         # ===== TAB DATA =====
         with tab_data:
-        st.subheader("Data Awal")
-        st.dataframe(data)
-
-        st.subheader("Cek Missing Value")
-        missing_values = data.isnull().sum()
-        if missing_values.sum() == 0:
-            st.success("Data tidak memiliki missing value")
-        else:
-            st.write(missing_values)
-
-        st.subheader("Data Visualisasi")
-        fig, ax = plt.subplots(figsize=(12, 6))
-        if "Harga" in data.columns:
-            ax.plot(data.index, data["Harga"])
-            ax.set_ylabel("Harga")
-        else:
-            st.warning("Kolom 'Harga' tidak ditemukan di data.")
-        ax.set_xlabel("Tanggal")
-        ax.set_title("Grafik Harga Cabai Keriting di Jawa Timur")
-        ax.grid(True)
-        st.pyplot(fig)
-
-        st.subheader("Statistik Deskriptif Harga per Tahun")
-        if "Harga" in data.columns:
-            data_per_tahun = data.copy()
-            data_per_tahun["Tahun"] = data_per_tahun.index.to_period("Y")
-            statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
-            st.dataframe(statistik)
-        else:
-            st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
+          st.subheader("Data Awal")
+          st.dataframe(data)
+  
+          st.subheader("Cek Missing Value")
+          missing_values = data.isnull().sum()
+          if missing_values.sum() == 0:
+              st.success("Data tidak memiliki missing value")
+          else:
+              st.write(missing_values)
+  
+          st.subheader("Data Visualisasi")
+          fig, ax = plt.subplots(figsize=(12, 6))
+          if "Harga" in data.columns:
+              ax.plot(data.index, data["Harga"])
+              ax.set_ylabel("Harga")
+          else:
+              st.warning("Kolom 'Harga' tidak ditemukan di data.")
+          ax.set_xlabel("Tanggal")
+          ax.set_title("Grafik Harga Cabai Keriting di Jawa Timur")
+          ax.grid(True)
+          st.pyplot(fig)
+  
+          st.subheader("Statistik Deskriptif Harga per Tahun")
+          if "Harga" in data.columns:
+              data_per_tahun = data.copy()
+              data_per_tahun["Tahun"] = data_per_tahun.index.to_period("Y")
+              statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
+              st.dataframe(statistik)
+          else:
+              st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
 
     # -------------------
     # TAB 2: UJI STASIONERITAS
