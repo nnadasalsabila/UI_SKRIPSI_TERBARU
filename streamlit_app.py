@@ -307,7 +307,7 @@ if uploaded_file:
             # Uji Goldfeld-Quandt (Heteroskedastisitas)
             # -------------------
             try:
-                y_train_for_gq = arima_y_train  # ganti sesuai variabel data latih ARIMA di script
+                y_train_for_gq = y_train_arima  # ganti sesuai variabel data latih ARIMA di script
             except NameError:
                 st.error("Variabel arima_y_train tidak ditemukan. Pastikan sudah didefinisikan sebelum pengujian GQ.")
             else:
