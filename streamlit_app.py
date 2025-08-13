@@ -459,9 +459,6 @@ if uploaded_file:
                 else:
                     st.success("Tidak ada heteroskedastisitas")
     
-            else:
-                st.warning("Tidak ada model yang semua p-valunya < 0.05.")
-
     # -------------------
     # TAB : PREDIKSI & EVALUASI
     # -------------------
