@@ -292,10 +292,13 @@ if uploaded_file:
             x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
             x_dummy_const = add_constant(x_dummy)
     
-            residual_arima = pd.DataFrame(arima_best_model.resid)
+            residual_arima = (arima_best_model.resid)
     
             # Uji KS
-            ks_stat, ks_p_value = stats.kstest(residual_arima.resid, 'norm', args=(0, 1))
+            ks_stat, ks_p_value = stats.kstest(
+                (residual_arima - residual_arima.mean()) / residual_arima.std(ddof=1),
+                'norm', args=(0, 1)
+            )
             st.write(f"**Kolmogorov-Smirnov Test**")
             st.write(f"Statistik KS: {ks_stat:.8f}")
             st.write(f"P-value     : {ks_p_value:.8f}")
