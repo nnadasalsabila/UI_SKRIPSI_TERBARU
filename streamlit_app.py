@@ -281,6 +281,10 @@ if uploaded_file:
             from scipy import stats
             from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
             from statsmodels.tools.tools import add_constant
+
+            # GQ Test Konstanta
+            x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
+            x_dummy_const = add_constant(x_dummy)
     
             residual_arima = pd.DataFrame(arima_best_model.resid)
     
@@ -306,11 +310,8 @@ if uploaded_file:
             # -------------------
             # Uji Goldfeld-Quandt (Heteroskedastisitas)
             # -------------------
-          
-            x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)  # prediktor dummy (waktu)
-            x_dummy_const = add_constant(x_dummy)  # tambahkan konstanta
-            
-            gq_test_arima = het_goldfeldquandt(residual, x_train_const)
+                  
+            gq_test_arima = het_goldfeldquandt(residual, x_dummy_const)
             
             st.write("**Goldfeld-Quandt Test**")
             st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
