@@ -282,7 +282,7 @@ if uploaded_file:
             from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
             from statsmodels.tools.tools import add_constant
     
-            residual = pd.DataFrame(arima_best_model.resid)
+            residual_arima = pd.DataFrame(arima_best_model.resid)
     
             # Uji KS
             ks_stat, ks_p_value = stats.kstest(arima_best_model.resid, 'norm', args=(0, 1))
@@ -295,7 +295,7 @@ if uploaded_file:
                 st.error("Residual tidak terdistribusi normal (menolak H0).")
     
             # Uji White Noise - Ljung Box
-            ljung_box_result = acorr_ljungbox(residual, lags=[10, 20, 30, 40], return_df=True)
+            ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
             st.write("**Ljung-Box Test**")
             st.dataframe(ljung_box_result)
             if (ljung_box_result['lb_pvalue'] > 0.05).all():
@@ -306,23 +306,19 @@ if uploaded_file:
             # -------------------
             # Uji Goldfeld-Quandt (Heteroskedastisitas)
             # -------------------
-            try:
-                y_train_for_gq = y_train_arima  # ganti sesuai variabel data latih ARIMA di script
-            except NameError:
-                st.error("Variabel arima_y_train tidak ditemukan. Pastikan sudah didefinisikan sebelum pengujian GQ.")
-            else:
-                x_dummy = np.arange(len(y_train_for_gq)).reshape(-1, 1)  # prediktor dummy (waktu)
-                x_dummy_const = add_constant(x_dummy)  # tambahkan konstanta
+          
+            x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)  # prediktor dummy (waktu)
+            x_dummy_const = add_constant(x_dummy)  # tambahkan konstanta
             
-                gq_stat, gq_p_value, _ = het_goldfeldquandt(y_train_for_gq, x_dummy_const)
+           gq_test_arima = het_goldfeldquandt(residual, x_train_const)
             
-                st.write("**Goldfeld-Quandt Test**")
-                st.write(f"Statistik GQ: {gq_stat:.8f}")
-                st.write(f"P-value     : {gq_p_value:.8f}")
-                if gq_p_value <= 0.05:
-                    st.error("Ada heteroskedastisitas (tolak H0).")
-                else:
-                    st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
+           st.write("**Goldfeld-Quandt Test**")
+           st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
+           st.write(f"P-value     : {gq_test_arima[1]:.8f}")
+           if gq_test_arima[1] <= 0.05:                   
+             st.error("Ada heteroskedastisitas (tolak H0).")
+           else:
+             st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
     
     # -------------------
     # TAB : ARIMAX
