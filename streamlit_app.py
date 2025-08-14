@@ -150,40 +150,43 @@ elif menu == "📊 Pemodelan & Prediksi":
     # TAB : SPLITTING DATA
     # -------------------
     with tab_splitting:
-        st.subheader("Splitting Data - Training & Testing")
-        # Buat DataFrame untuk ARIMAX
-        data_arimax = pd.DataFrame({
-            'Y': data['Harga'],
-            'X1': data['Idul Adha'],
-            'X2': data['Natal']
-        })
+      if 'data' in locals() and data is not None an not data.empty and all(col in data.columns for col in ["Harga", "Idul Adha", "Natal"]):
+          st.subheader("Splitting Data - Training & Testing")
+          # Buat DataFrame untuk ARIMAX
+          data_arimax = pd.DataFrame({
+              'Y': data['Harga'],
+              'X1': data['Idul Adha'],
+              'X2': data['Natal']
+          })
     
-        # Pastikan index adalah datetime
-        data_arimax.index = pd.to_datetime(data_arimax.index)
+          # Pastikan index adalah datetime
+          data_arimax.index = pd.to_datetime(data_arimax.index)
+      
+          # Tentukan tanggal split
+          split_date = '2024-12-25'
     
-        # Tentukan tanggal split
-        split_date = '2024-12-25'
+          # Split target (y)
+          y_train = data_arimax['Y'].loc[data_arimax.index < split_date]
+          y_test  = data_arimax['Y'].loc[data_arimax.index >= split_date]
+      
+          # Split eksogen (x)
+          x_train = data_arimax[['X1', 'X2']].loc[data_arimax.index < split_date]
+          x_test  = data_arimax[['X1', 'X2']].loc[data_arimax.index >= split_date]
     
-        # Split target (y)
-        y_train = data_arimax['Y'].loc[data_arimax.index < split_date]
-        y_test  = data_arimax['Y'].loc[data_arimax.index >= split_date]
-    
-        # Split eksogen (x)
-        x_train = data_arimax[['X1', 'X2']].loc[data_arimax.index < split_date]
-        x_test  = data_arimax[['X1', 'X2']].loc[data_arimax.index >= split_date]
-    
-        # Tampilkan hasil ke Streamlit
-        st.write("Jumlah data y_train:", len(y_train))
-        st.write("Jumlah data y_test :", len(y_test))
-        st.write("Jumlah data x_train:", len(x_train))
-        st.write("Jumlah data x_test :", len(x_test))
-    
-        st.write("📋 **Preview Data Training**")
-        st.dataframe(y_train.head())
-        st.dataframe(x_train.head())
-        st.write("📋 **Preview Data Testing**")
-        st.dataframe(y_test.head())
-        st.dataframe(x_test.head())
+          # Tampilkan hasil ke Streamlit
+          st.write("Jumlah data y_train:", len(y_train))
+          st.write("Jumlah data y_test :", len(y_test))
+          st.write("Jumlah data x_train:", len(x_train))
+          st.write("Jumlah data x_test :", len(x_test))
+      
+          st.write("📋 **Preview Data Training**")
+          st.dataframe(y_train.head())
+          st.dataframe(x_train.head())
+          st.write("📋 **Preview Data Testing**")
+          st.dataframe(y_test.head())
+          st.dataframe(x_test.head())
+      else:
+        st.info("Silakan unggah data terlebih dahulu untuk melakukan splitting.")
       
     # -------------------
     # TAB : ARIMA MODEL
