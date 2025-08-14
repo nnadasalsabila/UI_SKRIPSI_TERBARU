@@ -150,7 +150,7 @@ elif menu == "📊 Pemodelan & Prediksi":
     # TAB : SPLITTING DATA
     # -------------------
     with tab_splitting:
-      if 'data' in locals() and data is not None an not data.empty and all(col in data.columns for col in ["Harga", "Idul Adha", "Natal"]):
+      if 'data' in locals() and data is not None and not data.empty and all(col in data.columns for col in ["Harga", "Idul Adha", "Natal"]):
           st.subheader("Splitting Data - Training & Testing")
           # Buat DataFrame untuk ARIMAX
           data_arimax = pd.DataFrame({
