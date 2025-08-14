@@ -184,301 +184,288 @@ elif menu == "📊 Pemodelan & Prediksi":
       else:
           st.info("Silakan unggah data terlebih dahulu untuk melakukan splitting.")
 
-    # -------------------
-    # TAB : ARIMA MODEL
-    # -------------------
- 
-        # Pastikan index adalah datetime
-        data.index = pd.to_datetime(data.index)
-   
-        # Tentukan tanggal split
-        split_date = '2024-12-26'
-    
-        # Split target (y)
-        y_train_arima = data['Harga'].loc[data.index < split_date]
-        y_test_arima  = data['Harga'].loc[data.index >= split_date]
-      
-        # Tampilkan hasil ke Streamlit
-        st.write("Jumlah data y_train:", len(y_train_arima))
-        st.write("Jumlah data y_test :", len(y_test_arima))
-
-    with tab_arima:
-        st.header("🔍 Pencarian Model ARIMA Terbaik")
-    
-        from statsmodels.tsa.arima.model import ARIMA
-        import pandas as pd
-    
-        # Input parameter range manual
-        col1, col2 = st.columns(2)
-        with col1:
-            p_start = st.number_input("P mulai dari", min_value=0, max_value=10, value=0, key="arima_p_start")
-            p_end = st.number_input("P sampai", min_value=p_start+1, max_value=10, value=5, key="arima_p_end")
-        with col2:
-            d_start = st.number_input("D mulai dari", min_value=0, max_value=4, value=1, key="arima_d_start")
-            d_end = st.number_input("D sampai", min_value=d_start+1, max_value=4, value=2, key="arima_d_end")
-        col3, col4 = st.columns(2)
-        with col3:
-            q_start = st.number_input("Q mulai dari", min_value=0, max_value=10, value=0, key="arima_q_start")
-            q_end = st.number_input("Q sampai", min_value=q_start+1, max_value=10, value=8, key="arima_q_end")
-        
-        # Buat range berdasarkan input
-        p = range(p_start, p_end)
-        d = range(d_start, d_end)
-        q = range(q_start, q_end)
-      
-        # Inisialisasi variabel agar tidak NameError di tab berikutnya
-        arima_best_model = None
-        arima_best_order = None
-        arima_best_aic = None
-    
-        if st.button("Jalankan ARIMA"):
-            results = []
-            significant_models = []
-    
-            with st.spinner("🔄 Sedang mencari kombinasi ARIMA terbaik..."):
-                for p_val in p:
-                    for d_val in d:
-                        for q_val in q:
-                            try:
-                                model = ARIMA(y_train_arima, order=(p_val, d_val, q_val))
-                                model_fit = model.fit()
-    
-                                pvalues = model_fit.pvalues
-    
-                                # Simpan model yang signifikan
-                                if all(pv < 0.05 for pv in pvalues):
-                                    significant_models.append({
-                                        'Order (p,d,q)': (p_val, d_val, q_val),
-                                        'AIC': model_fit.aic,
-                                        'p-values': pvalues,
-                                        'Summary': model_fit.summary(),
-                                        'ModelFit': model_fit
-                                    })
-    
-                                # Simpan semua model
-                                results.append({
-                                    'Order (p,d,q)': (p_val, d_val, q_val),
-                                    'AIC': model_fit.aic,
-                                    'p-values': pvalues,
-                                    'Summary': model_fit.summary(),
-                                    'ModelFit': model_fit
-                                })
-    
-                            except Exception as e:
-                                st.write(f"⚠️ Error pada ARIMA({p_val},{d_val},{q_val}): {e}")
-                                continue
-    
-            # Tampilkan hasil model signifikan
-            if significant_models:
-                summary_df = pd.DataFrame({
-                    'Order (p,d,q)': [m['Order (p,d,q)'] for m in significant_models],
-                    'AIC': [m['AIC'] for m in significant_models]
-                }).sort_values(by='AIC').reset_index(drop=True)
-    
-                st.success("📌 Model yang signifikan berdasarkan p-value < 0.05:")
-                st.dataframe(summary_df)
-    
-                # Ambil model dengan AIC terkecil
-                best_model_info = min(significant_models, key=lambda x: x['AIC'])
-            else:
-                st.warning("❌ Tidak ada model signifikan. Memilih model dengan AIC terkecil dari semua hasil.")
-                best_model_info = min(results, key=lambda x: x['AIC'])
-              
-            # Simpan best model
-            arima_best_model = best_model_info['ModelFit']
-            arima_best_order = best_model_info['Order (p,d,q)']
-            arima_best_aic = best_model_info['AIC']
-    
-            st.markdown(f"**Model ARIMA terbaik:** {arima_best_order} (AIC: {arima_best_aic:.2f})")
-    
-            with st.expander("📄 Lihat Summary Model Terbaik"):
-                st.text(best_model_info['Summary'])
-    
-            # -------------------
-            # Uji Diagnostik Model ARIMA
-            # -------------------
-            st.subheader("Uji Diagnostik Model Terbaik")
-            from scipy import stats
-            from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
-            from statsmodels.tools.tools import add_constant
-            import numpy as np
-
-            # Pastikan y_train_arima selalu ada
-            if 'y_train_arima' not in locals():
-                split_date = '2024-12-26'
-                y_train_arima = data['Harga'].loc[data.index < split_date]
-
-            # Buat variabel prediktor waktu (dummy)
-            x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
-            x_dummy_const = add_constant(x_dummy)
-    
-            residual_arima = (arima_best_model.resid)
-    
-            # Uji KS
-            ks_stat, ks_p_value = stats.kstest(residual_arima, 'norm', args=(0, 1))
-            st.write(f"**Kolmogorov-Smirnov Test**")
-            st.write(f"Statistik KS: {ks_stat:.8f}")
-            st.write(f"P-value     : {ks_p_value:.8f}")
-            if ks_p_value > 0.05:
-                st.success("Residual terdistribusi normal (gagal menolak H0).")
-            else:
-                st.error("Residual tidak terdistribusi normal (menolak H0).")
-    
-            # Uji White Noise - Ljung Box
-            ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
-            st.write("**Ljung-Box Test**")
-            st.dataframe(ljung_box_result)
-            if (ljung_box_result['lb_pvalue'] > 0.05).all():
-                st.success("Residual adalah White Noise (gagal menolak H0).")
-            else:
-                st.error("Residual bukan White Noise (menolak H0).")
-            
-            # Uji Goldfeld-Quandt (Heteroskedastisitas)   
-            gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
-            
-            st.write("**Goldfeld-Quandt Test**")
-            st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
-            st.write(f"P-value     : {gq_test_arima[1]:.8f}")
-            if gq_test_arima[1] <= 0.05:                   
-              st.error("Ada heteroskedastisitas (tolak H0).")
-            else:
-              st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
-    
-    # -------------------
-    # TAB : ARIMAX
-    # -------------------
-
-    with tab_arimax:
-        st.subheader("Pemodelan ARIMAX")
-    
-        from statsmodels.tsa.statespace.sarimax import SARIMAX
-        import pandas as pd
-    
-        # === Input parameter dalam range ===
-        col1, col2 = st.columns(2)
-        with col1:
-            p_start = st.number_input("P mulai dari", min_value=0, max_value=10, value=0, key="arimax_p_start")
-            p_end = st.number_input("P sampai", min_value=p_start+1, max_value=10, value=5, key="arimax_p_end")
-        with col2:
-            d_start = st.number_input("D mulai dari", min_value=0, max_value=4, value=1, key="arimax_d_start")
-            d_end = st.number_input("D sampai", min_value=d_start+1, max_value=4, value=2, key="arimax_d_end")
-    
-        col3, col4 = st.columns(2)
-        with col3:
-            q_start = st.number_input("Q mulai dari", min_value=0, max_value=10, value=0, key="arimax_q_start")
-            q_end = st.number_input("Q sampai", min_value=q_start+1, max_value=10, value=7, key="arimax_q_end")
-
-        # Buat range berdasarkan input
-        p_range = range(p_start, p_end)
-        d_range = range(d_start, d_end)
-        q_range = range(q_start, q_end)
-
-        # Inisialisasi agar tidak NameError di tab berikutnya
-        best_model = None
-        best_order = None
-        best_aic = None
-    
-        if st.button("Jalankan ARIMAX"):
-            results = []
-            significant_models = []
-            best_result = None  # untuk menyimpan model terbaik
-    
-            with st.spinner("Sedang melakukan fitting model ARIMAX..."):
-                for p in p_range:
-                    for d in d_range:
-                        for q in q_range:
-                            try:
-                                model = SARIMAX(y_train, order=(p, d, q), exog=x_train)
-                                model_fit = model.fit(disp=False)
-    
-                                pvalues = model_fit.pvalues
-    
-                                if all(pv < 0.05 for pv in pvalues):
-                                    significant_models.append({
-                                        'Order (p,d,q)': (p, d, q),
-                                        'AIC': model_fit.aic,
-                                        'p-values': pvalues,
-                                        'Summary': model_fit.summary(),
-                                        'ModelFit': model_fit
-                                    })
-    
-                                results.append({
-                                    'Order (p,d,q)': (p, d, q),
-                                    'AIC': model_fit.aic,
-                                    'p-values': pvalues,
-                                    'Summary': model_fit.summary(),
-                                    'ModelFit': model_fit
-                                })
-    
-                            except Exception as e:
-                                st.write(f"Error pada ARIMAX({p},{d},{q}): {e}")
-                                continue
-    
-            if significant_models:
-                summary_df = pd.DataFrame({
-                    'Order (p,d,q)': [m['Order (p,d,q)'] for m in significant_models],
-                    'AIC': [m['AIC'] for m in significant_models]
-                }).sort_values(by='AIC').reset_index(drop=True)
-    
-                st.write("### Model signifikan (p-value < 0.05):")
-                st.dataframe(summary_df)
-    
-                # Ambil model terbaik
-                best_model_info = min(significant_models, key=lambda x: x['AIC'])
-            else:
+  # ===== TAB PEMODELAN ARIMA ===== #
+  with tab_arima:
+      # Pastikan index adalah datetime
+      data.index = pd.to_datetime(data.index)
+  
+      # Tentukan tanggal split
+      split_date = '2024-12-26'
+  
+      # Split target (y)
+      y_train_arima = data['Harga'].loc[data.index < split_date]
+      y_test_arima  = data['Harga'].loc[data.index >= split_date]
+  
+      # Tampilkan hasil ke Streamlit
+      st.write("Jumlah data y_train:", len(y_train_arima))
+      st.write("Jumlah data y_test :", len(y_test_arima))
+  
+      st.header("🔍 Pencarian Model ARIMA Terbaik")
+  
+      from statsmodels.tsa.arima.model import ARIMA
+      import pandas as pd
+  
+      # Input parameter range manual
+      col1, col2 = st.columns(2)
+      with col1:
+          p_start = st.number_input("P mulai dari", min_value=0, max_value=10, value=0, key="arima_p_start")
+          p_end = st.number_input("P sampai", min_value=p_start+1, max_value=10, value=5, key="arima_p_end")
+      with col2:
+          d_start = st.number_input("D mulai dari", min_value=0, max_value=4, value=1, key="arima_d_start")
+          d_end = st.number_input("D sampai", min_value=d_start+1, max_value=4, value=2, key="arima_d_end")
+      col3, col4 = st.columns(2)
+      with col3:
+          q_start = st.number_input("Q mulai dari", min_value=0, max_value=10, value=0, key="arima_q_start")
+          q_end = st.number_input("Q sampai", min_value=q_start+1, max_value=10, value=8, key="arima_q_end")
+  
+      # Buat range berdasarkan input
+      p = range(p_start, p_end)
+      d = range(d_start, d_end)
+      q = range(q_start, q_end)
+  
+      # Inisialisasi variabel agar tidak NameError di tab berikutnya
+      arima_best_model = None
+      arima_best_order = None
+      arima_best_aic = None
+  
+      if st.button("Jalankan ARIMA"):
+          results = []
+          significant_models = []
+  
+          with st.spinner("🔄 Sedang mencari kombinasi ARIMA terbaik..."):
+              for p_val in p:
+                  for d_val in d:
+                      for q_val in q:
+                          try:
+                              model = ARIMA(y_train_arima, order=(p_val, d_val, q_val))
+                              model_fit = model.fit()
+  
+                              pvalues = model_fit.pvalues
+  
+                              # Simpan model yang signifikan
+                              if all(pv < 0.05 for pv in pvalues):
+                                  significant_models.append({
+                                      'Order (p,d,q)': (p_val, d_val, q_val),
+                                      'AIC': model_fit.aic,
+                                      'p-values': pvalues,
+                                      'Summary': model_fit.summary(),
+                                      'ModelFit': model_fit
+                                  })
+  
+                              # Simpan semua model
+                              results.append({
+                                  'Order (p,d,q)': (p_val, d_val, q_val),
+                                  'AIC': model_fit.aic,
+                                  'p-values': pvalues,
+                                  'Summary': model_fit.summary(),
+                                  'ModelFit': model_fit
+                              })
+  
+                          except Exception as e:
+                              st.write(f"⚠️ Error pada ARIMA({p_val},{d_val},{q_val}): {e}")
+                              continue
+  
+          # Tampilkan hasil model signifikan
+          if significant_models:
+              summary_df = pd.DataFrame({
+                  'Order (p,d,q)': [m['Order (p,d,q)'] for m in significant_models],
+                  'AIC': [m['AIC'] for m in significant_models]
+              }).sort_values(by='AIC').reset_index(drop=True)
+  
+              st.success("📌 Model yang signifikan berdasarkan p-value < 0.05:")
+              st.dataframe(summary_df)
+  
+              # Ambil model dengan AIC terkecil
+              best_model_info = min(significant_models, key=lambda x: x['AIC'])
+          else:
               st.warning("❌ Tidak ada model signifikan. Memilih model dengan AIC terkecil dari semua hasil.")
               best_model_info = min(results, key=lambda x: x['AIC'])
-               
-            arimax_best_model = best_model_info['ModelFit']
-            arimax_best_order = best_model_info['Order (p,d,q)']
-            arimax_best_aic = best_model_info['AIC']
-            
-            st.markdown(f"**Model ARIMAX terbaik:** {arimax_best_order} (AIC: {arimax_best_aic:.2f})")
+  
+          # Simpan best model
+          arima_best_model = best_model_info['ModelFit']
+          arima_best_order = best_model_info['Order (p,d,q)']
+          arima_best_aic = best_model_info['AIC']
+  
+          st.markdown(f"**Model ARIMA terbaik:** {arima_best_order} (AIC: {arima_best_aic:.2f})")
+  
+          with st.expander("📄 Lihat Summary Model Terbaik"):
+              st.text(best_model_info['Summary'])
 
-            with st.expander("📄 Lihat Summary Model Terbaik"):
-                st.text(best_model_info['Summary'])
-    
-                # -------------------
-                # Uji Diagnostik
-                # -------------------
-                st.subheader("Uji Diagnostik Model Terbaik")
-                from scipy import stats
-                from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
-                from statsmodels.tools.tools import add_constant
-    
-                residual = pd.DataFrame(arimax_best_model.resid)
-    
-                # Uji KS
-                ks_stat, ks_p_value = stats.kstest(arimax_best_model.resid, 'norm', args=(0, 1))
-                st.write(f"**Kolmogorov-Smirnov Test**")
-                st.write(f"Statistik KS: {ks_stat:.8f}")
-                st.write(f"P-value     : {ks_p_value:.8f}")
-                if ks_p_value > 0.05:
-                    st.success("Residual terdistribusi normal (gagal menolak H0).")
-                else:
-                    st.error("Residual tidak terdistribusi normal (menolak H0).")
-    
-                # Uji White Noise - Ljung Box
-                ljung_box_result = acorr_ljungbox(residual, lags=[10,20,30,40], return_df=True)
-                st.write("**Ljung-Box Test**")
-                st.dataframe(ljung_box_result)
-                ljung_box_p_value = ljung_box_result['lb_pvalue'].iloc[0]
-                if ljung_box_p_value > 0.05:
-                    st.success("Residual adalah White Noise (gagal menolak H0).")
-                else:
-                    st.error("Residual bukan White Noise (menolak H0).")
-    
-                # Uji Heteroskedastisitas - Goldfeld Quandt
-                x_train_const = add_constant(x_train)
-                gq_test = het_goldfeldquandt(residual, x_train_const)
-                st.write("**Goldfeld-Quandt Test**")
-                st.write(f"Statistik GQ: {gq_test[0]:.8f}")
-                st.write("P-value     :", gq_test[1])  # tampilkan tanpa pembulatan
-                if gq_test[1] <= 0.05:
-                    st.error("Ada heteroskedastisitas (tolak H0)")
-                else:
-                    st.success("Tidak ada heteroskedastisitas")
-    
+    # ---Uji Diagnostik Model ARIMA--- #
+    st.subheader("Uji Diagnostik Model Terbaik")
+    from scipy import stats
+    from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
+    from statsmodels.tools.tools import add_constant
+    import numpy as np
+
+    # Pastikan y_train_arima selalu ada
+    if 'y_train_arima' not in locals():
+        split_date = '2024-12-26'
+        y_train_arima = data['Harga'].loc[data.index < split_date]
+
+    # Buat variabel prediktor waktu (dummy)
+    x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
+    x_dummy_const = add_constant(x_dummy)
+
+    residual_arima = arima_best_model.resid
+
+    # Uji KS
+    ks_stat, ks_p_value = stats.kstest(residual_arima, 'norm', args=(0, 1))
+    st.write(f"**Kolmogorov-Smirnov Test**")
+    st.write(f"Statistik KS: {ks_stat:.8f}")
+    st.write(f"P-value     : {ks_p_value:.8f}")
+    if ks_p_value > 0.05:
+        st.success("Residual terdistribusi normal (gagal menolak H0).")
+    else:
+        st.error("Residual tidak terdistribusi normal (menolak H0).")
+
+    # Uji White Noise - Ljung Box
+    ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
+    st.write("**Ljung-Box Test**")
+    st.dataframe(ljung_box_result)
+    if (ljung_box_result['lb_pvalue'] > 0.05).all():
+        st.success("Residual adalah White Noise (gagal menolak H0).")
+    else:
+        st.error("Residual bukan White Noise (menolak H0).")
+
+    # Uji Goldfeld-Quandt (Heteroskedastisitas)   
+    gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
+
+    st.write("**Goldfeld-Quandt Test**")
+    st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
+    st.write(f"P-value     : {gq_test_arima[1]:.8f}")
+    if gq_test_arima[1] <= 0.05:                   
+        st.error("Ada heteroskedastisitas (tolak H0).")
+    else:
+        st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
+
+  # ===== TAB PEMODELAN ARIMAX ===== #
+  with tab_arimax:
+      st.subheader("Pemodelan ARIMAX")
+      from statsmodels.tsa.statespace.sarimax import SARIMAX
+      import pandas as pd
+  
+      # === Input parameter dalam range ===
+      col1, col2 = st.columns(2)
+      with col1:
+          p_start = st.number_input("P mulai dari", min_value=0, max_value=10, value=0, key="arimax_p_start")
+          p_end = st.number_input("P sampai", min_value=p_start+1, max_value=10, value=5, key="arimax_p_end")
+      with col2:
+          d_start = st.number_input("D mulai dari", min_value=0, max_value=4, value=1, key="arimax_d_start")
+          d_end = st.number_input("D sampai", min_value=d_start+1, max_value=4, value=2, key="arimax_d_end")
+  
+      col3, col4 = st.columns(2)
+      with col3:
+          q_start = st.number_input("Q mulai dari", min_value=0, max_value=10, value=0, key="arimax_q_start")
+          q_end = st.number_input("Q sampai", min_value=q_start+1, max_value=10, value=7, key="arimax_q_end")
+  
+      # Buat range berdasarkan input
+      p_range = range(p_start, p_end)
+      d_range = range(d_start, d_end)
+      q_range = range(q_start, q_end)
+  
+      # Inisialisasi agar tidak NameError di tab berikutnya
+      best_model = None
+      best_order = None
+      best_aic = None
+  
+      if st.button("Jalankan ARIMAX"):
+          results = []
+          significant_models = []
+  
+          with st.spinner("Sedang melakukan fitting model ARIMAX..."):
+              for p in p_range:
+                  for d in d_range:
+                      for q in q_range:
+                          try:
+                              model = SARIMAX(y_train, order=(p, d, q), exog=x_train)
+                              model_fit = model.fit(disp=False)
+                              pvalues = model_fit.pvalues
+  
+                              if all(pv < 0.05 for pv in pvalues):
+                                  significant_models.append({
+                                      'Order (p,d,q)': (p, d, q),
+                                      'AIC': model_fit.aic,
+                                      'p-values': pvalues,
+                                      'Summary': model_fit.summary(),
+                                      'ModelFit': model_fit
+                                  })
+  
+                              results.append({
+                                  'Order (p,d,q)': (p, d, q),
+                                  'AIC': model_fit.aic,
+                                  'p-values': pvalues,
+                                  'Summary': model_fit.summary(),
+                                  'ModelFit': model_fit
+                              })
+  
+                          except Exception as e:
+                              st.write(f"Error pada ARIMAX({p},{d},{q}): {e}")
+                              continue
+  
+          # Pilih model terbaik
+          if significant_models:
+              summary_df = pd.DataFrame({
+                  'Order (p,d,q)': [m['Order (p,d,q)'] for m in significant_models],
+                  'AIC': [m['AIC'] for m in significant_models]
+              }).sort_values(by='AIC').reset_index(drop=True)
+  
+              st.write("### Model signifikan (p-value < 0.05):")
+              st.dataframe(summary_df)
+              best_model_info = min(significant_models, key=lambda x: x['AIC'])
+          else:
+              st.warning("❌ Tidak ada model signifikan. Memilih model dengan AIC terkecil dari semua hasil.")
+              best_model_info = min(results, key=lambda x: x['AIC'])
+  
+          arimax_best_model = best_model_info['ModelFit']
+          arimax_best_order = best_model_info['Order (p,d,q)']
+          arimax_best_aic = best_model_info['AIC']
+  
+          st.markdown(f"**Model ARIMAX terbaik:** {arimax_best_order} (AIC: {arimax_best_aic:.2f})")
+  
+          with st.expander("📄 Lihat Summary Model Terbaik"):
+              st.text(best_model_info['Summary'])
+  
+          # -------------------
+          # Uji Diagnostik
+          # -------------------
+          st.subheader("Uji Diagnostik Model Terbaik")
+          from scipy import stats
+          from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
+          from statsmodels.tools.tools import add_constant
+  
+          residual = pd.DataFrame(arimax_best_model.resid)
+  
+          # Uji KS
+          ks_stat, ks_p_value = stats.kstest(arimax_best_model.resid, 'norm', args=(0, 1))
+          st.write(f"**Kolmogorov-Smirnov Test**")
+          st.write(f"Statistik KS: {ks_stat:.8f}")
+          st.write(f"P-value     : {ks_p_value:.8f}")
+          if ks_p_value > 0.05:
+              st.success("Residual terdistribusi normal (gagal menolak H0).")
+          else:
+              st.error("Residual tidak terdistribusi normal (menolak H0).")
+  
+          # Uji White Noise - Ljung Box
+          ljung_box_result = acorr_ljungbox(residual, lags=[10, 20, 30, 40], return_df=True)
+          st.write("**Ljung-Box Test**")
+          st.dataframe(ljung_box_result)
+          if (ljung_box_result['lb_pvalue'] > 0.05).all():
+              st.success("Residual adalah White Noise (gagal menolak H0).")
+          else:
+              st.error("Residual bukan White Noise (menolak H0).")
+  
+          # Uji Heteroskedastisitas - Goldfeld Quandt
+          x_train_const = add_constant(x_train)
+          gq_test = het_goldfeldquandt(residual, x_train_const)
+          st.write("**Goldfeld-Quandt Test**")
+          st.write(f"Statistik GQ: {gq_test[0]:.8f}")
+          st.write("P-value     :", gq_test[1])
+          if gq_test[1] <= 0.05:
+              st.error("Ada heteroskedastisitas (tolak H0)")
+          else:
+              st.success("Tidak ada heteroskedastisitas")
+
     # -------------------
     # TAB : PREDIKSI & EVALUASI
     # -------------------
