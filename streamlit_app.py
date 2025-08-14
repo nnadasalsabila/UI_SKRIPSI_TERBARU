@@ -34,32 +34,33 @@ if menu == "🏠 Homepage":
 # 4. HALAMAN ANALISIS
 # -------------------
 elif menu == "📊 Pemodelan & Prediksi":
-    st.header("📂 Upload Data")
-    uploaded_file = st.file_uploader("Upload file CSV/Excel", type=["csv", "xlsx"])
+  st.header("📂 Upload Data")
+  uploaded_file = st.file_uploader("Upload file CSV/Excel", type=["csv", "xlsx"])
+
+  # Buat tab hanya kalau data sudah ada
+  tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"])
     
-    if uploaded_file:
-        # Baca file
-        if uploaded_file.name.endswith(".csv"):
-            data = pd.read_csv(uploaded_file)
-        else:
-            data = pd.read_excel(uploaded_file)
+  if uploaded_file:
+      # Baca file
+      if uploaded_file.name.endswith(".csv"):
+        data = pd.read_csv(uploaded_file)
+      else:
+        data = pd.read_excel(uploaded_file)
 
-        # Pastikan kolom tanggal ada dan jadi index
-        data.columns = data.columns.str.strip()
-        if 'Tanggal' in data.columns:
-            data['Tanggal'] = pd.to_datetime(data['Tanggal'], errors='coerce')
-            data.set_index('Tanggal', inplace=True)
-        elif 'date' in data.columns:
-            data['date'] = pd.to_datetime(data['date'], errors='coerce')
-            data.set_index('date', inplace=True)
-        else:
-            st.error("Kolom tanggal tidak ditemukan!")
-            st.stop()
-
-        # Buat tab hanya kalau data sudah ada
-        tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(
-            ["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi & Evaluasi"]
-        )
+      # Pastikan kolom tanggal ada dan jadi index
+      data.columns = data.columns.str.strip()
+      if 'Tanggal' in data.columns:
+        data['Tanggal'] = pd.to_datetime(data['Tanggal'], errors='coerce')
+        data.set_index('Tanggal', inplace=True)
+      elif 'date' in data.columns:
+        data['date'] = pd.to_datetime(data['date'], errors='coerce')
+        data.set_index('date', inplace=True)
+      else:
+        st.error("Kolom tanggal tidak ditemukan!")
+        st.stop()
+  else:
+    with tab_data:
+      st.info("Silakan upload file terlebih dahulu.")
 
         # ===== TAB DATA =====
         with tab_data:
