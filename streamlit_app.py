@@ -145,7 +145,7 @@ elif menu == "📊 Pemodelan & Prediksi":
           st.info("Silakan unggah data terlebih dahulu untuk melakukan uji stasioneritas.")
 
   # ===== TAB SPLITTING DATA ===== #
-    with tab_splitting:
+  with tab_splitting:
       if 'data' in locals() and data is not None and not data.empty and all(col in data.columns for col in ["Harga", "Idul Adha", "Natal"]):
           st.subheader("Splitting Data - Training & Testing")
           # Buat DataFrame untuk ARIMAX
@@ -154,13 +154,13 @@ elif menu == "📊 Pemodelan & Prediksi":
               'X1': data['Idul Adha'],
               'X2': data['Natal']
           })
-    
+  
           # Pastikan index adalah datetime
           data_arimax.index = pd.to_datetime(data_arimax.index)
       
           # Tentukan tanggal split
           split_date = '2024-12-25'
-    
+  
           # Split target (y)
           y_train = data_arimax['Y'].loc[data_arimax.index < split_date]
           y_test  = data_arimax['Y'].loc[data_arimax.index >= split_date]
@@ -168,7 +168,7 @@ elif menu == "📊 Pemodelan & Prediksi":
           # Split eksogen (x)
           x_train = data_arimax[['X1', 'X2']].loc[data_arimax.index < split_date]
           x_test  = data_arimax[['X1', 'X2']].loc[data_arimax.index >= split_date]
-    
+  
           # Tampilkan hasil ke Streamlit
           st.write("Jumlah data y_train:", len(y_train))
           st.write("Jumlah data y_test :", len(y_test))
@@ -182,8 +182,8 @@ elif menu == "📊 Pemodelan & Prediksi":
           st.dataframe(y_test.head())
           st.dataframe(x_test.head())
       else:
-        st.info("Silakan unggah data terlebih dahulu untuk melakukan splitting.")
-      
+          st.info("Silakan unggah data terlebih dahulu untuk melakukan splitting.")
+
     # -------------------
     # TAB : ARIMA MODEL
     # -------------------
