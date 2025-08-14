@@ -11,6 +11,37 @@ from statsmodels.tsa.arima.model import ARIMA
 st.set_page_config(page_title="Dashboard Prediksi Harga Cabai",
                    page_icon="🌶️",
                    layout="wide")
+# CSS Kustom untuk sidebar & kotak
+st.markdown("""
+    <style>
+        /* Sidebar */
+        section[data-testid="stSidebar"] {
+            background-color: #1e1e1e;
+        }
+        /* Tombol menu di sidebar */
+        div[role="radiogroup"] > label {
+            background-color: #d60000;
+            color: white;
+            border-radius: 10px;
+            padding: 8px;
+            margin: 5px 0px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        div[role="radiogroup"] > label:hover {
+            background-color: #a80000;
+        }
+        /* Kotak fitur & panduan */
+        .red-box {
+            background-color: #d60000;
+            padding: 20px;
+            border-radius: 15px;
+            color: white;
+            min-height: 250px;
+        }
+    </style>
+""", unsafe_allow_html=True)
 # -------------------
 # 2. SIDEBAR MENU
 # -------------------
@@ -19,17 +50,17 @@ menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Pemodelan & Prediksi
 # 3. HALAMAN HOME
 # -------------------
 if menu == "🏠 Homepage":
-    st.title("🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur")
-    st.markdown("""
-    ## Tentang Aplikasi
-    Website ini merupakan sistem prediksi harga komoditas cabai untuk membantu pemantauan fluktuasi harga cabai di Jawa Timur. Model prediksi yang digunakan adalah ARIMAX (Autoregressive Integrated Moving Average with Exogenous Variables).
+    st.markdown("<h2 style='text-align: center;'>Dashboard Prediksi Harga Cabai di Jawa Timur</h2>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='text-align: center;'>Website ini merupakan sistem prediksi harga komoditas cabai untuk membantu pemantauan fluktuasi harga cabai di Jawa Timur. Model prediksi yang digunakan adalah ARIMAX (Autoregressive Integrated Moving Average with Exogenous Variables).</p>",
+        unsafe_allow_html=True
+    )
 
-    ### Fitur
-    1. **Upload Data**: Unggah file CSV atau Excel berisi harga harian.
-    2. **Uji Stasioneritas**: Periksa kestabilan data sebelum pemodelan.
-    3. **Model ARIMAX**: Pemodelan dengan variabel dummy hari besar.
-    4. **Prediksi & Evaluasi**: Prediksi harga ke depan dan uji akurasinya.
-    """)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("<div class='red-box'><h4>Fitur:</h4><ul><li>Upload Data harga harian</li><li>Uji Stasioneritas</li><li>Model ARIMAX</li><li>Prediksi & Evaluasi</li></ul></div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<div class='red-box'><h4>Panduan Penggunaan:</h4><p>1. Pilih menu Pemodelan & Prediksi<br>2. Upload file CSV/Excel<br>3. Tentukan parameter model<br>4. Lihat hasil prediksi</p></div>", unsafe_allow_html=True)
 # -------------------
 # 4. HALAMAN ANALISIS
 # -------------------
