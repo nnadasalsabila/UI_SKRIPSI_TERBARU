@@ -291,53 +291,53 @@ elif menu == "📊 Pemodelan & Prediksi":
           with st.expander("📄 Lihat Summary Model Terbaik"):
               st.text(best_model_info['Summary'])
 
-    # ---Uji Diagnostik Model ARIMA--- #
-    st.subheader("Uji Diagnostik Model Terbaik")
-    from scipy import stats
-    from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
-    from statsmodels.tools.tools import add_constant
-    import numpy as np
-
-    # Pastikan y_train_arima selalu ada
-    if 'y_train_arima' not in locals():
-        split_date = '2024-12-26'
-        y_train_arima = data['Harga'].loc[data.index < split_date]
-
-    # Buat variabel prediktor waktu (dummy)
-    x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
-    x_dummy_const = add_constant(x_dummy)
-
-    residual_arima = arima_best_model.resid
-
-    # Uji KS
-    ks_stat, ks_p_value = stats.kstest(residual_arima, 'norm', args=(0, 1))
-    st.write(f"**Kolmogorov-Smirnov Test**")
-    st.write(f"Statistik KS: {ks_stat:.8f}")
-    st.write(f"P-value     : {ks_p_value:.8f}")
-    if ks_p_value > 0.05:
-        st.success("Residual terdistribusi normal (gagal menolak H0).")
-    else:
-        st.error("Residual tidak terdistribusi normal (menolak H0).")
-
-    # Uji White Noise - Ljung Box
-    ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
-    st.write("**Ljung-Box Test**")
-    st.dataframe(ljung_box_result)
-    if (ljung_box_result['lb_pvalue'] > 0.05).all():
-        st.success("Residual adalah White Noise (gagal menolak H0).")
-    else:
-        st.error("Residual bukan White Noise (menolak H0).")
-
-    # Uji Goldfeld-Quandt (Heteroskedastisitas)   
-    gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
-
-    st.write("**Goldfeld-Quandt Test**")
-    st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
-    st.write(f"P-value     : {gq_test_arima[1]:.8f}")
-    if gq_test_arima[1] <= 0.05:                   
-        st.error("Ada heteroskedastisitas (tolak H0).")
-    else:
-        st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
+          # ---Uji Diagnostik Model ARIMA--- #
+          st.subheader("Uji Diagnostik Model Terbaik")
+          from scipy import stats
+          from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
+          from statsmodels.tools.tools import add_constant
+          import numpy as np
+      
+          # Pastikan y_train_arima selalu ada
+          if 'y_train_arima' not in locals():
+              split_date = '2024-12-26'
+              y_train_arima = data['Harga'].loc[data.index < split_date]
+      
+          # Buat variabel prediktor waktu (dummy)
+          x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
+          x_dummy_const = add_constant(x_dummy)
+      
+          residual_arima = arima_best_model.resid
+      
+          # Uji KS
+          ks_stat, ks_p_value = stats.kstest(residual_arima, 'norm', args=(0, 1))
+          st.write(f"**Kolmogorov-Smirnov Test**")
+          st.write(f"Statistik KS: {ks_stat:.8f}")
+          st.write(f"P-value     : {ks_p_value:.8f}")
+          if ks_p_value > 0.05:
+              st.success("Residual terdistribusi normal (gagal menolak H0).")
+          else:
+              st.error("Residual tidak terdistribusi normal (menolak H0).")
+      
+          # Uji White Noise - Ljung Box
+          ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
+          st.write("**Ljung-Box Test**")
+          st.dataframe(ljung_box_result)
+          if (ljung_box_result['lb_pvalue'] > 0.05).all():
+              st.success("Residual adalah White Noise (gagal menolak H0).")
+          else:
+              st.error("Residual bukan White Noise (menolak H0).")
+      
+          # Uji Goldfeld-Quandt (Heteroskedastisitas)   
+          gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
+      
+          st.write("**Goldfeld-Quandt Test**")
+          st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
+          st.write(f"P-value     : {gq_test_arima[1]:.8f}")
+          if gq_test_arima[1] <= 0.05:                   
+              st.error("Ada heteroskedastisitas (tolak H0).")
+          else:
+              st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
 
   # ===== TAB PEMODELAN ARIMAX ===== #
   with tab_arimax:
