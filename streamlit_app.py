@@ -60,7 +60,7 @@ elif menu == "📊 Pemodelan & Prediksi":
         st.stop()
   else:
     with tab_data:
-      st.info("Silakan upload file terlebih dahulu.")
+      st.info("Silahkan unggah file terlebih dahulu.")
 
   # ===== TAB DATA ===== #
   with tab_data:
@@ -96,7 +96,7 @@ elif menu == "📊 Pemodelan & Prediksi":
           else:
               st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
       else:
-          st.info("Silakan unggah data terlebih dahulu untuk melihat isi tab ini.")
+          pass
                
   # ===== TAB UJI STASIONERITAS ===== #
   with tab_stasioneritas:
@@ -142,7 +142,7 @@ elif menu == "📊 Pemodelan & Prediksi":
           axes[1].set_title("PACF - Setelah Differencing")
           st.pyplot(fig)
       else:
-          st.info("Silakan unggah data terlebih dahulu untuk melakukan uji stasioneritas.")
+          st.info("Silahkan unggah data terlebih dahulu untuk melakukan uji stasioneritas.")
 
   # ===== TAB SPLITTING DATA ===== #
   with tab_splitting:
@@ -182,10 +182,11 @@ elif menu == "📊 Pemodelan & Prediksi":
           st.dataframe(y_test.head())
           st.dataframe(x_test.head())
       else:
-          st.info("Silakan unggah data terlebih dahulu untuk melakukan splitting.")
+          st.info("Silahkan unggah data terlebih dahulu untuk melakukan splitting.")
 
   # ===== TAB PEMODELAN ARIMA ===== #
   with tab_arima:
+      st.subheader("Pemodelan ARIMA")
       # Pastikan data sudah ada
       if 'data' in locals() and data is not None:
           data.index = pd.to_datetime(data.index)
