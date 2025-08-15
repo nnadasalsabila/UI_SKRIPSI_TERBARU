@@ -21,7 +21,7 @@ st.markdown("""
             background-color: #5d0d02;
         }
         div[role="radiogroup"] > label {
-            background-color: #ffebe4;
+            background-color: #ff7a7a;
             color: white;
             border-radius: 10px;
             padding: 8px;
