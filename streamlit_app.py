@@ -25,9 +25,8 @@ st.markdown(
     }
 
     /* Background utama merah */
-    .main {
+    [data-testid="stAppViewContainer"] {
         background-color: #ff4d4d;
-        padding: 2rem;
     }
 
     /* Styling card */
@@ -39,10 +38,22 @@ st.markdown(
         max-width: 900px;
         margin: auto;
     }
+
+    /* Judul besar di tengah */
+    .main-title {
+        text-align: center;
+        font-size: 36px;
+        font-weight: bold;
+        color: red;
+        margin-bottom: 30px;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+# Judul di tengah
+st.markdown('<h1 class="main-title">🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur</h1>', unsafe_allow_html=True)
 
 # -------------------
 # 2. SIDEBAR MENU
@@ -55,12 +66,13 @@ menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Pemodelan & Prediksi
 if menu == "🏠 Homepage":
     st.markdown('<p class="big-title">🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur</p>', unsafe_allow_html=True)
 
+    # Konten homepage
     homepage_html = """
     <div class="card">
         <h3>Tentang Aplikasi</h3>
         <p>Website ini merupakan sistem prediksi harga komoditas cabai untuk membantu pemantauan fluktuasi harga cabai di Jawa Timur. 
         Model prediksi yang digunakan adalah <b>ARIMAX (Autoregressive Integrated Moving Average with Exogenous Variables)</b>.</p>
-
+    
         <h4>Fitur</h4>
         <ol>
             <li><b>Upload Data</b>: Unggah file CSV atau Excel berisi harga harian.</li>
@@ -70,6 +82,7 @@ if menu == "🏠 Homepage":
         </ol>
     </div>
     """
+    
     st.markdown(homepage_html, unsafe_allow_html=True)
 
 # -------------------
