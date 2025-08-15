@@ -210,7 +210,6 @@ elif menu == "📊 Pemodelan & Prediksi":
                   # Step 2 - Differencing + langsung Uji ADF kedua
                   if st.button("Lakukan Differencing & Uji ADF Kembali"):
                       data_diff = data["Harga"].diff().dropna()
-                      st.line_chart(data_diff)
   
                       result_diff = adfuller(data_diff.dropna())
                       st.write("### Hasil Uji ADF Setelah Differencing")
