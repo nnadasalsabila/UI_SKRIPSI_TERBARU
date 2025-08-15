@@ -13,43 +13,23 @@ st.set_page_config(page_title="Dashboard Prediksi Harga Cabai",
                    layout="wide")
 
 # Tambahkan CSS untuk shadow & styling card
-st.markdown(
-    """
+st.markdown("""
     <style>
-    /* Sidebar hitam */
-    [data-testid="stSidebar"] {
-        background-color: #000000;
-    }
-    [data-testid="stSidebar"] * {
-        color: white !important;
-    }
-
-    /* Background utama merah */
-    [data-testid="stAppViewContainer"] {
-        background-color: #ff4d4d;
-    }
-
-    /* Styling card */
     .card {
         background-color: white;
         padding: 20px;
         border-radius: 15px;
-        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
-        max-width: 900px;
-        margin: auto;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+        margin-bottom: 20px;
     }
-
-    /* Judul besar di tengah */
-    .main-title {
-        text-align: center;
+    .big-title {
         font-size: 36px;
         font-weight: bold;
-        color: red;
-        margin-bottom: 30px;
+        color: #d62828;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
     }
     </style>
-    """,
-    unsafe_allow_html=True
+""", unsafe_allow_html=True)
 )
 
 # Judul di tengah
@@ -64,8 +44,6 @@ menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Pemodelan & Prediksi
 # 3. HALAMAN HOME
 # -------------------
 if menu == "🏠 Homepage":
-    st.markdown('<p class="big-title">🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur</p>', unsafe_allow_html=True)
-
     # Konten homepage
     homepage_html = """
     <div class="card">
