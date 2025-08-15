@@ -81,14 +81,14 @@ if menu == "🏠 Homepage":
             <div class='sub-section'>
                 <div class='sub-col'>
                     <h4>Fitur:</h4>
-                    <ul>
-                        <li>1. Analisis Data</li>
-                        <li>2. Uji Stasioneritas</li>
-                        <li>3. Splitting Data</li>
-                        <li>4. Pemodelan ARIMA</li>
-                        <li>5. Pemodelan ARIMAX</li>
-                        <li>6. Prediksi Mendatang</li>
-                    </ul>
+                    <p>
+                        1. Analisis Data<br>
+                        2. Uji Stasioneritas<br>
+                        3. Splitting Data<br>
+                        4. Pemodelan ARIMA<br>
+                        5. Pemodelan ARIMAX<br>
+                        6. Prediksi Mendatang<br>
+                    </p>
                 </div>
                 <div class='sub-col'>
                     <h4>Syarat Penggunaan:</h4>
@@ -140,13 +140,18 @@ elif menu == "📊 Pemodelan & Prediksi":
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
           st.dataframe(data)
-  
+
           st.subheader("Cek Missing Value")
           missing_values = data.isnull().sum()
+  
+          # Ubah menjadi DataFrame biar tabel rapi
+          missing_df = missing_values.reset_index()
+          missing_df.columns = ["Kolom", "Jumlah Missing"]
+  
           if missing_values.sum() == 0:
               st.success("Data tidak memiliki missing value")
           else:
-              st.write(missing_values)
+              st.dataframe(missing_df)
   
           st.subheader("Data Visualisasi")
           fig, ax = plt.subplots(figsize=(12, 6))
