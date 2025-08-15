@@ -41,18 +41,20 @@ st.markdown("""
             border-radius: 15px;
             box-shadow: 0px 6px 25px rgba(0, 0, 0, 0.25);
         }
-        /* Bagian Fitur & Panduan di dalam card (jadi 2 kolom) */
+        /* Container untuk dua kotak merah */
         .sub-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        /* Kotak merah masing-masing */
+        .sub-col {
+            flex: 1;
             background-color: #d60000;
             color: white;
             padding: 20px;
             border-radius: 10px;
-            margin-top: 20px;
-            display: flex;
-            gap: 30px;
-        }
-        .sub-col {
-            flex: 1;
+            box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
         }
         .sub-col h4 {
             margin-top: 0;
