@@ -18,7 +18,7 @@ st.markdown("""
     <style>
         /* Sidebar */
         section[data-testid="stSidebar"] {
-            background-color: #1e1e1e;
+            background-color: #ffebe4;
         }
         div[role="radiogroup"] > label {
             background-color: #d60000;
@@ -31,7 +31,7 @@ st.markdown("""
             align-items: center;
         }
         div[role="radiogroup"] > label:hover {
-            background-color: #a80000;
+            background-color: #d60000;
         }
         /* Card besar */
         .big-card {
@@ -82,12 +82,12 @@ if menu == "🏠 Homepage":
                 <div class='sub-col'>
                     <h4>Fitur:</h4>
                     <ul>
-                        <li>Analisis Data</li>
-                        <li>Uji Stasioneritas</li>
-                        <li>Splitting Data</li>
-                        <li>Pemodelan ARIMA</li>
-                        <li>Pemodelan ARIMAX</li>
-                        <li>Prediksi Mendatang</li>
+                        <li>1. Analisis Data</li>
+                        <li>2. Uji Stasioneritas</li>
+                        <li>3. Splitting Data</li>
+                        <li>4. Pemodelan ARIMA</li>
+                        <li>5. Pemodelan ARIMAX</li>
+                        <li>6. Prediksi Mendatang</li>
                     </ul>
                 </div>
                 <div class='sub-col'>
