@@ -143,15 +143,16 @@ elif menu == "📊 Pemodelan & Prediksi":
 
           st.subheader("Cek Missing Value")
           missing_values = data.isnull().sum()
-  
-          # Ubah menjadi DataFrame biar tabel rapi
-          missing_df = missing_values.reset_index()
-          missing_df.columns = ["Kolom", "Jumlah Missing"]
+          
+          # Buat DataFrame dari hasil missing value
+          missing_df = pd.DataFrame({
+              "Kolom": missing_values.index,
+              "Jumlah Missing": missing_values.values
+          })
+          st.dataframe(missing_df, use_container_width=True)
   
           if missing_values.sum() == 0:
               st.success("Data tidak memiliki missing value")
-          else:
-              st.dataframe(missing_df)
   
           st.subheader("Data Visualisasi")
           fig, ax = plt.subplots(figsize=(12, 6))
