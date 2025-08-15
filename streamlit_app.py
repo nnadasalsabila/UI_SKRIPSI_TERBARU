@@ -153,18 +153,15 @@ elif menu == "📊 Pemodelan & Prediksi":
   
           if missing_values.sum() == 0:
               st.success("Data tidak memiliki missing value")
-  
+
+          st.subheader("📊 Visualisasi Harga Cabai")
+
+
           st.subheader("Data Visualisasi")
-          fig, ax = plt.subplots(figsize=(12, 6))
           if "Harga" in data.columns:
-              ax.plot(data.index, data["Harga"])
-              ax.set_ylabel("Harga")
+              st.line_chart(data['Harga'])
           else:
               st.warning("Kolom 'Harga' tidak ditemukan di data.")
-          ax.set_xlabel("Tanggal")
-          ax.set_title("Grafik Harga Cabai Keriting di Jawa Timur")
-          ax.grid(True)
-          st.pyplot(fig)
   
           st.subheader("Statistik Deskriptif Harga per Tahun")
           if "Harga" in data.columns:
