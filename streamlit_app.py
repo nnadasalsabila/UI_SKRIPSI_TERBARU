@@ -13,23 +13,36 @@ st.set_page_config(page_title="Dashboard Prediksi Harga Cabai",
                    layout="wide")
 
 # Tambahkan CSS untuk shadow & styling card
-st.markdown("""
+st.markdown(
+    """
     <style>
+    /* Sidebar hitam */
+    [data-testid="stSidebar"] {
+        background-color: #000000;
+    }
+    [data-testid="stSidebar"] * {
+        color: white !important;
+    }
+
+    /* Background utama merah */
+    .main {
+        background-color: #ff4d4d;
+        padding: 2rem;
+    }
+
+    /* Styling card */
     .card {
         background-color: white;
         padding: 20px;
         border-radius: 15px;
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
-        margin-bottom: 20px;
-    }
-    .big-title {
-        font-size: 36px;
-        font-weight: bold;
-        color: #d62828;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+        max-width: 900px;
+        margin: auto;
     }
     </style>
-""", unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
 
 # -------------------
 # 2. SIDEBAR MENU
@@ -42,23 +55,23 @@ menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Pemodelan & Prediksi
 if menu == "🏠 Homepage":
     st.markdown('<p class="big-title">🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur</p>', unsafe_allow_html=True)
 
-    homepage_html = (
-        '<div class="card">'
-        '<h3>Tentang Aplikasi</h3>'
-        '<p>Website ini merupakan sistem prediksi harga komoditas cabai untuk membantu pemantauan fluktuasi harga cabai di Jawa Timur. '
-        'Model prediksi yang digunakan adalah <b>ARIMAX (Autoregressive Integrated Moving Average with Exogenous Variables)</b>.</p>'
+    homepage_html = """
+    <div class="card">
+        <h3>Tentang Aplikasi</h3>
+        <p>Website ini merupakan sistem prediksi harga komoditas cabai untuk membantu pemantauan fluktuasi harga cabai di Jawa Timur. 
+        Model prediksi yang digunakan adalah <b>ARIMAX (Autoregressive Integrated Moving Average with Exogenous Variables)</b>.</p>
 
-        '<h4>Fitur</h4>'
-        '<ol>'
-        '<li><b>Upload Data</b>: Unggah file CSV atau Excel berisi harga harian.</li>'
-        '<li><b>Uji Stasioneritas</b>: Periksa kestabilan data sebelum pemodelan.</li>'
-        '<li><b>Model ARIMAX</b>: Pemodelan dengan variabel dummy hari besar.</li>'
-        '<li><b>Prediksi & Evaluasi</b>: Prediksi harga ke depan dan uji akurasinya.</li>'
-        '</ol>'
-        '</div>'
-    )
-
+        <h4>Fitur</h4>
+        <ol>
+            <li><b>Upload Data</b>: Unggah file CSV atau Excel berisi harga harian.</li>
+            <li><b>Uji Stasioneritas</b>: Periksa kestabilan data sebelum pemodelan.</li>
+            <li><b>Model ARIMAX</b>: Pemodelan dengan variabel dummy hari besar.</li>
+            <li><b>Prediksi & Evaluasi</b>: Prediksi harga ke depan dan uji akurasinya.</li>
+        </ol>
+    </div>
+    """
     st.markdown(homepage_html, unsafe_allow_html=True)
+
 # -------------------
 # 5. HALAMAN ANALISIS
 # -------------------
