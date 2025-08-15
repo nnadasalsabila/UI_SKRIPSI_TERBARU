@@ -82,19 +82,21 @@ if menu == "🏠 Homepage":
                 <div class='sub-col'>
                     <h4>Fitur:</h4>
                     <ul>
-                        <li>Upload Data harga harian</li>
+                        <li>Analisis Data</li>
                         <li>Uji Stasioneritas</li>
-                        <li>Model ARIMAX</li>
-                        <li>Prediksi & Evaluasi</li>
+                        <li>Splitting Data</li>
+                        <li>Pemodelan ARIMA</li>
+                        <li>Pemodelan ARIMAX</li>
+                        <li>Prediksi Mendatang</li>
                     </ul>
                 </div>
                 <div class='sub-col'>
-                    <h4>Panduan Penggunaan:</h4>
+                    <h4>Syarat Penggunaan:</h4>
                     <p>
-                        1. Pilih menu Pemodelan & Prediksi<br>
-                        2. Upload file CSV/Excel<br>
-                        3. Tentukan parameter model<br>
-                        4. Lihat hasil prediksi
+                        1. Dataset yang digunakan merupakan file CSV/Excel<br>
+                        2. Dataset berisi kolom 'Tanggal', 'Harga' untuk variabel target, dan 'Idul Adha' 'Natal' untuk variabel eksogen'<br>
+                        3. Pengguna wajib menginputkan parameter secara manual<br>
+                        4. Hasil prediksi yang ditampilkan hanya untuk periode satu minggu mendatang<br>
                     </p>
                 </div>
             </div>
