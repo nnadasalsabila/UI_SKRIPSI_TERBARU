@@ -293,9 +293,6 @@ elif menu == "📊 Pemodelan & Prediksi":
             y_train_arima = data['Harga'].loc[data.index < split_date]
             y_test_arima  = data['Harga'].loc[data.index >= split_date]
     
-            st.write("Jumlah data y_train:", len(y_train_arima))
-            st.write("Jumlah data y_test :", len(y_test_arima))
-    
             st.header("🔍 Pencarian Model ARIMA Terbaik")
     
             from statsmodels.tsa.arima.model import ARIMA
