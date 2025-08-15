@@ -30,7 +30,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-)
 
 # Judul di tengah
 st.markdown('<h1 class="main-title">🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur</h1>', unsafe_allow_html=True)
