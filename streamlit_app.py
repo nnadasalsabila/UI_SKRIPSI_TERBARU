@@ -18,7 +18,7 @@ st.markdown("""
     <style>
         /* Sidebar */
         section[data-testid="stSidebar"] {
-            background-color: #ad4242;
+            background-color: #5d0d02;
         }
         div[role="radiogroup"] > label {
             background-color: #ffebe4;
@@ -31,7 +31,7 @@ st.markdown("""
             align-items: center;
         }
         div[role="radiogroup"] > label:hover {
-            background-color: #d60000;
+            background-color: #a61804;
         }
         /* Card besar */
         .big-card {
@@ -50,7 +50,7 @@ st.markdown("""
         /* Kotak merah masing-masing */
         .sub-col {
             flex: 1;
-            background-color: #dd1d3f;
+            background-color: #a61804;
             color: white;
             padding: 20px;
             border-radius: 10px;
