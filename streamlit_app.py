@@ -41,20 +41,30 @@ st.markdown("""
             border-radius: 15px;
             box-shadow: 0px 6px 25px rgba(0, 0, 0, 0.25);
         }
-        /* Bagian Fitur & Panduan di dalam card */
+        /* Bagian Fitur & Panduan di dalam card (jadi 2 kolom) */
         .sub-section {
             background-color: #d60000;
             color: white;
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
+            display: flex;
+            gap: 30px;
+        }
+        .sub-col {
+            flex: 1;
+        }
+        .sub-col h4 {
+            margin-top: 0;
         }
     </style>
 """, unsafe_allow_html=True)
+
 # -------------------
 # 2. SIDEBAR MENU
 # -------------------
 menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Pemodelan & Prediksi"])
+
 # -------------------
 # 3. HALAMAN HOME
 # -------------------
@@ -67,23 +77,28 @@ if menu == "🏠 Homepage":
                 Model prediksi yang digunakan adalah <b>ARIMAX</b> (Autoregressive Integrated Moving Average with Exogenous Variables).
             </p>
             <div class='sub-section'>
-                <h4>Fitur:</h4>
-                <ul>
-                    <li>Upload Data harga harian</li>
-                    <li>Uji Stasioneritas</li>
-                    <li>Model ARIMAX</li>
-                    <li>Prediksi & Evaluasi</li>
-                </ul>
-                <h4>Panduan Penggunaan:</h4>
-                <p>
-                    1. Pilih menu Pemodelan & Prediksi<br>
-                    2. Upload file CSV/Excel<br>
-                    3. Tentukan parameter model<br>
-                    4. Lihat hasil prediksi
-                </p>
+                <div class='sub-col'>
+                    <h4>Fitur:</h4>
+                    <ul>
+                        <li>Upload Data harga harian</li>
+                        <li>Uji Stasioneritas</li>
+                        <li>Model ARIMAX</li>
+                        <li>Prediksi & Evaluasi</li>
+                    </ul>
+                </div>
+                <div class='sub-col'>
+                    <h4>Panduan Penggunaan:</h4>
+                    <p>
+                        1. Pilih menu Pemodelan & Prediksi<br>
+                        2. Upload file CSV/Excel<br>
+                        3. Tentukan parameter model<br>
+                        4. Lihat hasil prediksi
+                    </p>
+                </div>
             </div>
         </div>
     """, unsafe_allow_html=True)
+
 # -------------------
 # 4. HALAMAN ANALISIS
 # -------------------
