@@ -111,7 +111,7 @@ elif menu == "📊 Pemodelan & Prediksi":
   uploaded_file = st.file_uploader("Upload file CSV/Excel", type=["csv", "xlsx"])
 
   # Buat tab hanya kalau data sudah ada
-  tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "Prediksi Mendatang"])
+  tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "🎯 Prediksi Mendatang"])
     
   if uploaded_file:
       # Baca file
