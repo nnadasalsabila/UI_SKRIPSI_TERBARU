@@ -42,21 +42,23 @@ menu = st.sidebar.radio("Navigasi", ["🏠 Homepage", "📊 Pemodelan & Prediksi
 if menu == "🏠 Homepage":
     st.markdown('<p class="big-title">🌶️ Dashboard Prediksi Harga Cabai di Jawa Timur</p>', unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="card">
-        <h3>Tentang Aplikasi</h3>
-        <p>Website ini merupakan sistem prediksi harga komoditas cabai untuk membantu pemantauan fluktuasi harga cabai di Jawa Timur. 
-        Model prediksi yang digunakan adalah <b>ARIMAX (Autoregressive Integrated Moving Average with Exogenous Variables)</b>.</p>
+    homepage_html = (
+        '<div class="card">'
+        '<h3>Tentang Aplikasi</h3>'
+        '<p>Website ini merupakan sistem prediksi harga komoditas cabai untuk membantu pemantauan fluktuasi harga cabai di Jawa Timur. '
+        'Model prediksi yang digunakan adalah <b>ARIMAX (Autoregressive Integrated Moving Average with Exogenous Variables)</b>.</p>'
 
-        <h4>Fitur</h4>
-        <ol>
-            <li><b>Upload Data</b>: Unggah file CSV atau Excel berisi harga harian.</li>
-            <li><b>Uji Stasioneritas</b>: Periksa kestabilan data sebelum pemodelan.</li>
-            <li><b>Model ARIMAX</b>: Pemodelan dengan variabel dummy hari besar.</li>
-            <li><b>Prediksi & Evaluasi</b>: Prediksi harga ke depan dan uji akurasinya.</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
+        '<h4>Fitur</h4>'
+        '<ol>'
+        '<li><b>Upload Data</b>: Unggah file CSV atau Excel berisi harga harian.</li>'
+        '<li><b>Uji Stasioneritas</b>: Periksa kestabilan data sebelum pemodelan.</li>'
+        '<li><b>Model ARIMAX</b>: Pemodelan dengan variabel dummy hari besar.</li>'
+        '<li><b>Prediksi & Evaluasi</b>: Prediksi harga ke depan dan uji akurasinya.</li>'
+        '</ol>'
+        '</div>'
+    )
+
+    st.markdown(homepage_html, unsafe_allow_html=True)
 # -------------------
 # 5. HALAMAN ANALISIS
 # -------------------
