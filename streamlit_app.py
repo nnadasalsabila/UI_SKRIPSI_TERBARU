@@ -50,7 +50,7 @@ st.markdown("""
         /* Kotak merah masing-masing */
         .sub-col {
             flex: 1;
-            background-color: #d60000;
+            background-color: #dd1d3f;
             color: white;
             padding: 20px;
             border-radius: 10px;
