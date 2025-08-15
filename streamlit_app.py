@@ -18,10 +18,10 @@ st.markdown("""
     <style>
         /* Sidebar */
         section[data-testid="stSidebar"] {
-            background-color: #ffebe4;
+            background-color: #dd1d3f;
         }
         div[role="radiogroup"] > label {
-            background-color: #d60000;
+            background-color: #ffebe4;
             color: white;
             border-radius: 10px;
             padding: 8px;
