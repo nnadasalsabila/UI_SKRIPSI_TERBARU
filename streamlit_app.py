@@ -79,7 +79,7 @@ st.markdown("""
 # 2. SIDEBAR MENU
 # -------------------
 st.sidebar.markdown(
-    "<h2 style='color: white; font-size: 24px; font-weight: bold; margin-bottom: 10px;'>Navigasi</h2>",
+    "<h2 style='color: white; font-size: 24px; font-weight: bold; margin-bottom: 0px;'>Navigasi</h2>",
     unsafe_allow_html=True
 )
 
