@@ -26,6 +26,7 @@ st.markdown("""
             color: white !important;
             font-size: 24px !important;
             font-weight: bold !important;
+            margin-top: -10px !important;
             margin-bottom: 15px !important;
             display: block;
         }
