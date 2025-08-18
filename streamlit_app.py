@@ -1,4 +1,4 @@
-# streamlit_app.py
+ # streamlit_app.py
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -20,9 +20,18 @@ st.markdown("""
         section[data-testid="stSidebar"] {
             background-color: #5d0d02;
         }
+
+        /* Ubah teks Navigasi */
+        section[data-testid="stSidebar"] .stRadio > label:first-child {
+            color: white !important;
+            font-size: 22px !important;
+            font-weight: bold !important;
+        }
+
+        /* Styling tombol radio */
         div[role="radiogroup"] > label {
             background-color: #fcfcfc;
-            color: white;
+            color: black; /* ubah warna teks tombol biar kontras */
             border-radius: 10px;
             padding: 8px;
             margin: 5px 0px;
@@ -32,7 +41,9 @@ st.markdown("""
         }
         div[role="radiogroup"] > label:hover {
             background-color: #a61804;
+            color: white !important; /* teks ikut putih saat hover */
         }
+
         /* Card besar */
         .big-card {
             background-color: white;
