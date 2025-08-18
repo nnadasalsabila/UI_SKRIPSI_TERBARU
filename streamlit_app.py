@@ -24,8 +24,10 @@ st.markdown("""
         /* Ubah teks Navigasi */
         section[data-testid="stSidebar"] .stRadio > label:first-child {
             color: white !important;
-            font-size: 22px !important;
+            font-size: 24px !important;
             font-weight: bold !important;
+            margin-bottom: 15px !important;
+            display: block;
         }
 
         /* Styling tombol radio */
