@@ -440,9 +440,16 @@ elif menu == "📊 Pemodelan & Prediksi":
                           st.error("Ada heteroskedastisitas (tolak H0).")
                       else:
                           st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
-                  # === PREDIKSI & EVALUASI MAPE ===
-                  if st.button("Lakukan Prediksi & Evaluasi (MAPE)"):
-                      from sklearn.metrics import mean_absolute_percentage_error
+                  
+                  # === EVALUASI MAPE ARIMA ===
+                  if st.button("Lakukan Evaluasi (MAPE)"):
+                      import numpy as np
+
+                      # Fungsi MAPE manual
+                      def mean_absolute_percentage_error(y_true, y_pred):
+                          y_true, y_pred = np.array(y_true), np.array(y_pred)
+                          mask = y_true != 0  # hindari pembagian nol
+                          return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
   
                       # Prediksi train
                       pred_train = st.session_state.arima_best_model.predict(
@@ -456,17 +463,16 @@ elif menu == "📊 Pemodelan & Prediksi":
                           end=y_test_arima.index[-1],
                           dynamic=False
                       )
-  
                       # Hitung MAPE
-                      mape_train = mean_absolute_percentage_error(y_train_arima, pred_train) * 100
-                      mape_test = mean_absolute_percentage_error(y_test_arima, pred_test) * 100
+                      mape_arima_train = mean_absolute_percentage_error(y_train_arima, pred_train)
+                      mape_arima_test = mean_absolute_percentage_error(y_test_arima, pred_test)
   
                       # Simpan ke session_state
-                      st.session_state.mape_train = mape_train
-                      st.session_state.mape_test = mape_test
+                      st.session_state.mape_train = mape_arima_train
+                      st.session_state.mape_test = mape_arima_test
   
                   # Tampilkan hasil evaluasi jika sudah ada
-                  if "mape_train" in st.session_state and "mape_test" in st.session_state:
+                  if "mape_arima_train" in st.session_state and "mape_arima_test" in st.session_state:
                       st.subheader("📊 Hasil Evaluasi Model")
                       st.write(f"**MAPE Train:** {st.session_state.mape_train:.2f}%")
                       st.write(f"**MAPE Test :** {st.session_state.mape_test:.2f}%")
