@@ -375,8 +375,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                           'Order (p,d,q)': [m['Order (p,d,q)'] for m in significant_models],
                           'AIC': [m['AIC'] for m in significant_models]
                       }).sort_values(by='AIC').reset_index(drop=True)
-                 
-                      st.success("📌 Model yang signifikan berdasarkan p-value < 0.05:")
+                                    
                       best_model_info = min(significant_models, key=lambda x: x['AIC'])
                   else:
                       st.warning("❌ Tidak ada model signifikan. Memilih model dengan AIC terkecil dari semua hasil.")
@@ -392,10 +391,10 @@ elif menu == "📊 Pemodelan & Prediksi":
   
               # ==== TAMPILKAN HASIL JIKA SUDAH ADA DI SESSION_STATE ====
               if 'arima_best_model' in st.session_state:
-                  st.markdown(f"**Model ARIMA terbaik:** {st.session_state.arima_best_order} (AIC: {st.session_state.arima_best_aic:.2f})")
   
                   if not st.session_state.arima_results_df.empty:
                       st.success("📌 Model yang signifikan berdasarkan p-value < 0.05:")
+                      st.markdown(f"**Model ARIMA terbaik:** {st.session_state.arima_best_order} (AIC: {st.session_state.arima_best_aic:.2f})")
                       st.dataframe(st.session_state.arima_results_df)
   
                   with st.expander("📄 Lihat Summary Model Terbaik"):
