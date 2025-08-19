@@ -468,8 +468,8 @@ elif menu == "📊 Pemodelan & Prediksi":
                       mape_arima_test = mean_absolute_percentage_error(y_test_arima, pred_test)
   
                       # Simpan ke session_state
-                      st.session_state.mape_train = mape_arima_train
-                      st.session_state.mape_test = mape_arima_test
+                      st.session_state.mape_arima_train = mape_arima_train
+                      st.session_state.mape_arima_test = mape_arima_test
   
                   # Tampilkan hasil evaluasi jika sudah ada
                   if "mape_arima_train" in st.session_state and "mape_arima_test" in st.session_state:
