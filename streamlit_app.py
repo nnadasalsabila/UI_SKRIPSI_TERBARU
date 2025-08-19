@@ -593,51 +593,52 @@ elif menu == "📊 Pemodelan & Prediksi":
             from scipy import stats
             from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
             from statsmodels.tools.tools import add_constant
+            
+            if st.button("🔎 Jalankan Uji Diagnostik"):  
+                residual = pd.DataFrame(arimax_best_model.resid)
     
-            residual = pd.DataFrame(arimax_best_model.resid)
+                # Uji KS
+                ks_stat, ks_p_value = stats.kstest(arimax_best_model.resid, 'norm', args=(0, 1))
     
-            # Uji KS
-            ks_stat, ks_p_value = stats.kstest(arimax_best_model.resid, 'norm', args=(0, 1))
-
-            # Uji White Noise - Ljung Box
-            ljung_box_result = acorr_ljungbox(residual, lags=[10, 20, 30, 40], return_df=True)
-
-            # Uji Heteroskedastisitas - Goldfeld Quandt
-            x_train_const = add_constant(x_train)
-            gq_test = het_goldfeldquandt(residual, x_train_const)
-
-            # Simpan hasil diagnostik ke session_state
-            st.session_state['arimax_diagnostics'] = {
-                "KS": {"stat": ks_stat, "pvalue": ks_p_value},
-                "LjungBox": ljung_box_result,
-                "GoldfeldQuandt": {"stat": gq_test[0], "pvalue": gq_test[1]}
-            }
-
-            # Tampilkan hasil
-            st.write("**Kolmogorov-Smirnov Test**")
-            st.write(f"Statistik KS: {ks_stat:.8f}")
-            st.write(f"P-value     : {ks_p_value:.8f}")
-            if ks_p_value > 0.05:
-                st.success("Residual terdistribusi normal (gagal menolak H0).")
+                # Uji White Noise - Ljung Box
+                ljung_box_result = acorr_ljungbox(residual, lags=[10, 20, 30, 40], return_df=True)
+    
+                # Uji Heteroskedastisitas - Goldfeld Quandt
+                x_train_const = add_constant(x_train)
+                gq_test = het_goldfeldquandt(residual, x_train_const)
+    
+                # Simpan hasil diagnostik ke session_state
+                st.session_state['arimax_diagnostics'] = {
+                    "KS": {"stat": ks_stat, "pvalue": ks_p_value},
+                    "LjungBox": ljung_box_result,
+                    "GoldfeldQuandt": {"stat": gq_test[0], "pvalue": gq_test[1]}
+                }
+    
+                # Tampilkan hasil
+                st.write("**Kolmogorov-Smirnov Test**")
+                st.write(f"Statistik KS: {ks_stat:.8f}")
+                st.write(f"P-value     : {ks_p_value:.8f}")
+                if ks_p_value > 0.05:
+                    st.success("Residual terdistribusi normal (gagal menolak H0).")
+                else:
+                    st.error("Residual tidak terdistribusi normal (menolak H0).")
+    
+                st.write("**Ljung-Box Test**")
+                st.dataframe(ljung_box_result)
+                if (ljung_box_result['lb_pvalue'] > 0.05).all():
+                    st.success("Residual adalah White Noise (gagal menolak H0).")
+                else:
+                    st.error("Residual bukan White Noise (menolak H0).")
+    
+                st.write("**Goldfeld-Quandt Test**")
+                st.write(f"Statistik GQ: {gq_test[0]:.8f}")
+                st.write(f"P-value     : {gq_test[1]:.8f}")
+                if gq_test[1] <= 0.05:
+                    st.error("Ada heteroskedastisitas (tolak H0)")
+                else:
+                    st.success("Tidak ada heteroskedastisitas")
             else:
-                st.error("Residual tidak terdistribusi normal (menolak H0).")
-
-            st.write("**Ljung-Box Test**")
-            st.dataframe(ljung_box_result)
-            if (ljung_box_result['lb_pvalue'] > 0.05).all():
-                st.success("Residual adalah White Noise (gagal menolak H0).")
-            else:
-                st.error("Residual bukan White Noise (menolak H0).")
-
-            st.write("**Goldfeld-Quandt Test**")
-            st.write(f"Statistik GQ: {gq_test[0]:.8f}")
-            st.write(f"P-value     : {gq_test[1]:.8f}")
-            if gq_test[1] <= 0.05:
-                st.error("Ada heteroskedastisitas (tolak H0)")
-            else:
-                st.success("Tidak ada heteroskedastisitas")
-
-
+            st.info("Klik tombol untuk menjalankan uji diagnostik residual")
  
   # ===== TAB PREDIKSI & EVALUASI ===== #
   with tab_predeval:
