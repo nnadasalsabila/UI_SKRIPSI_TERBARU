@@ -647,3 +647,43 @@ elif menu == "📊 Pemodelan & Prediksi":
                       st.error("Ada heteroskedastisitas (tolak H0)")
                   else:
                       st.success("Tidak ada heteroskedastisitas")
+  
+              # === EVALUASI MAPE ARIMAX ===
+              if st.button("Lakukan Evaluasi (MAPE)"):
+                  import numpy as np
+  
+                  def mean_absolute_percentage_error(y_true, y_pred):
+                      y_true, y_pred = np.array(y_true), np.array(y_pred)
+                      mask = y_true != 0
+                      return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
+  
+                  # Prediksi train
+                  pred_train = st.session_state["arimax_best_model"].predict(
+                      start=y_train.index[0],
+                      end=y_train.index[-1],
+                      dynamic=False,
+                      exog=x_train
+                  )
+  
+                  # Prediksi test
+                  pred_test = st.session_state["arimax_best_model"].predict(
+                      start=y_test.index[0],
+                      end=y_test.index[-1],
+                      dynamic=False,
+                      exog=x_test
+                  )
+  
+                  # Hitung MAPE
+                  mape_train = mean_absolute_percentage_error(y_train, pred_train)
+                  mape_test = mean_absolute_percentage_error(y_test, pred_test)
+  
+                  st.session_state["mape_arimax_train"] = mape_train
+                  st.session_state["mape_arimax_test"] = mape_test
+  
+              if "mape_arimax_train" in st.session_state and "mape_arimax_test" in st.session_state:
+                  st.subheader("📊 Hasil Evaluasi Model")
+                  st.write(f"**MAPE Train:** {st.session_state['mape_arimax_train']:.2f}%")
+                  st.write(f"**MAPE Test :** {st.session_state['mape_arimax_test']:.2f}%")
+          else:
+              st.info("Silahkan jalankan ARIMAX untuk melihat hasil.")
+
