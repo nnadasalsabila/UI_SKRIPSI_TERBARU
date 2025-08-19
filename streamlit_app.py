@@ -697,7 +697,7 @@ elif menu == "📊 Pemodelan & Prediksi":
       st.subheader("Perbandingan Prediksi ARIMA dan ARIMAX pada Data Test")
   
       # Prediksi dengan ARIMA (tanpa exog)
-      pred_test_arima = result_arima.predict(
+      pred_test_arima = arima_best_model.predict(
           start=y_test.index[0],
           end=y_test.index[-1],
           dynamic=False
