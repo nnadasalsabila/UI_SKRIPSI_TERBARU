@@ -686,4 +686,131 @@ elif menu == "📊 Pemodelan & Prediksi":
                   st.write(f"**MAPE Test :** {st.session_state['mape_arimax_test']:.2f}%")
           else:
               st.info("Silahkan jalankan ARIMAX untuk melihat hasil.")
-
+           
+  # ===== TAB PREDIKSI MENDATANG ===== #
+  with tab_predeval:
+      st.header("📊 Prediksi & Evaluasi Model")
+  
+      # =========================
+      # 1. Prediksi Data Test
+      # =========================
+      st.subheader("Perbandingan Prediksi ARIMA dan ARIMAX pada Data Test")
+  
+      # Prediksi dengan ARIMA (tanpa exog)
+      pred_test_arima = result_arima.predict(
+          start=y_test.index[0],
+          end=y_test.index[-1],
+          dynamic=False
+      )
+  
+      # Prediksi dengan ARIMAX (pakai exog)
+      pred_test_arimax = arimax_best_model.predict(
+          start=y_test.index[0],
+          end=y_test.index[-1],
+          exog=x_test,
+          dynamic=False
+      )
+  
+      # Gabungkan hasil
+      hasil_test_df = pd.DataFrame({
+          'Tanggal': y_test.index,
+          'Aktual': y_test.values,
+          'Pred_ARIMA': pred_test_arima.values,
+          'Pred_ARIMAX': pred_test_arimax.values
+      })
+      st.dataframe(hasil_test_df)
+  
+      # Plot hasil test
+      fig_test, ax = plt.subplots(figsize=(12, 5))
+      ax.plot(y_test, label="Data Aktual", color="black")
+      ax.plot(pred_test_arima, label="Prediksi ARIMA", color="blue")
+      ax.plot(pred_test_arimax, label="Prediksi ARIMAX", color="red")
+      ax.set_title("Perbandingan Prediksi Data Test")
+      ax.set_xlabel("Tanggal")
+      ax.set_ylabel("Harga")
+      ax.legend()
+      ax.grid()
+      st.pyplot(fig_test)
+  
+      # =========================
+      # 2. Forecast Masa Mendatang
+      # =========================
+      st.subheader("Prediksi Masa Mendatang (Forecast) dengan Model ARIMAX")
+  
+      n_forecast = 8
+      future_dates = pd.date_range(start='2024-12-31', periods=n_forecast, freq='D')
+  
+      # Tanggal Idul Adha & Natal
+      idul_adha_dates = [
+          pd.Timestamp('2022-07-10'),
+          pd.Timestamp('2023-06-29'),
+          pd.Timestamp('2024-06-17'),
+          pd.Timestamp('2025-06-06')
+      ]
+      natal_dates = [
+          pd.Timestamp('2022-12-25'),
+          pd.Timestamp('2023-12-25'),
+          pd.Timestamp('2024-12-25'),
+          pd.Timestamp('2025-12-25')
+      ]
+  
+      # Range Idul Adha ±7 hari
+      idul_adha_ranges = []
+      for d in idul_adha_dates:
+          start_range = d - pd.Timedelta(days=7)
+          end_range = d + pd.Timedelta(days=7)
+          idul_adha_ranges.extend(pd.date_range(start=start_range, end=end_range))
+      idul_adha_ranges = set(idul_adha_ranges)
+  
+      # Range Natal ±7 hari
+      natal_ranges = []
+      for d in natal_dates:
+          start_range = d - pd.Timedelta(days=7)
+          end_range = d + pd.Timedelta(days=7)
+          natal_ranges.extend(pd.date_range(start=start_range, end=end_range))
+      natal_ranges = set(natal_ranges)
+  
+      # Exogenous future
+      future_exog = pd.DataFrame({
+          'X1': [1 if date in idul_adha_ranges else 0 for date in future_dates],
+          'X2': [1 if date in natal_ranges else 0 for date in future_dates]
+      }, index=future_dates)
+  
+      # Forecast dengan ARIMAX
+      forecast = result_312.forecast(steps=n_forecast, exog=future_exog)
+      forecast.index = future_dates
+  
+      # Tampilkan hasil tabel forecast
+      forecast_df = pd.DataFrame({
+          'Tanggal': forecast.index,
+          'Prediksi_ARIMAX': forecast.values
+      })
+      st.dataframe(forecast_df)
+  
+      # =========================
+      # 3. Visualisasi Forecast
+      # =========================
+      st.subheader("Visualisasi Prediksi Masa Mendatang")
+  
+      fig_forecast, ax = plt.subplots(figsize=(15, 6))
+  
+      # Data aktual
+      ax.plot(pd.concat([y_train, y_test]), label="Data Aktual (Train+Test)", color="black")
+  
+      # Prediksi test
+      ax.plot(pred_test_arimax, label="Prediksi Test (ARIMAX)", color="red")
+  
+      # Forecast masa depan
+      ax.plot(forecast, label="Forecast Masa Depan (ARIMAX)", color="green")
+  
+      # Garis pembatas
+      ax.axvline(y_test.index[0], color="orange", linestyle="--", label="Train/Test Split")
+      ax.axvline(forecast.index[0], color="purple", linestyle="--", label="Awal Forecast")
+  
+      ax.set_title("Prediksi Harga Cabai Keriting (Train, Test, dan Forecast)")
+      ax.set_xlabel("Tanggal")
+      ax.set_ylabel("Harga")
+      ax.legend()
+      ax.grid()
+      plt.tight_layout()
+      st.pyplot(fig_forecast)
