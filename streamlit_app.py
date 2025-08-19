@@ -501,7 +501,7 @@ elif menu == "📊 Pemodelan & Prediksi":
     if uploaded_file is None:
         st.info("Silahkan unggah data terlebih dahulu untuk melakukan pemodelan ARIMAX.")
     else:
-        # kode pemodelan ARIMAX di sini
+        # kode pemodelan ARIMAX
         st.subheader("Pemodelan ARIMAX")
         from statsmodels.tsa.statespace.sarimax import SARIMAX
         import pandas as pd
@@ -514,7 +514,6 @@ elif menu == "📊 Pemodelan & Prediksi":
         with col2:
             d_start = st.number_input("D mulai dari", min_value=0, max_value=4, value=1, key="arimax_d_start")
             d_end = st.number_input("D sampai", min_value=d_start+1, max_value=4, value=2, key="arimax_d_end")
-    
         col3, col4 = st.columns(2)
         with col3:
             q_start = st.number_input("Q mulai dari", min_value=0, max_value=10, value=0, key="arimax_q_start")
@@ -599,34 +598,47 @@ elif menu == "📊 Pemodelan & Prediksi":
     
             # Uji KS
             ks_stat, ks_p_value = stats.kstest(arimax_best_model.resid, 'norm', args=(0, 1))
-            st.write(f"**Kolmogorov-Smirnov Test**")
+
+            # Uji White Noise - Ljung Box
+            ljung_box_result = acorr_ljungbox(residual, lags=[10, 20, 30, 40], return_df=True)
+
+            # Uji Heteroskedastisitas - Goldfeld Quandt
+            x_train_const = add_constant(x_train)
+            gq_test = het_goldfeldquandt(residual, x_train_const)
+
+            # Simpan hasil diagnostik ke session_state
+            st.session_state['arimax_diagnostics'] = {
+                "KS": {"stat": ks_stat, "pvalue": ks_p_value},
+                "LjungBox": ljung_box_result,
+                "GoldfeldQuandt": {"stat": gq_test[0], "pvalue": gq_test[1]}
+            }
+
+            # Tampilkan hasil
+            st.write("**Kolmogorov-Smirnov Test**")
             st.write(f"Statistik KS: {ks_stat:.8f}")
             st.write(f"P-value     : {ks_p_value:.8f}")
             if ks_p_value > 0.05:
                 st.success("Residual terdistribusi normal (gagal menolak H0).")
             else:
                 st.error("Residual tidak terdistribusi normal (menolak H0).")
-    
-            # Uji White Noise - Ljung Box
-            ljung_box_result = acorr_ljungbox(residual, lags=[10, 20, 30, 40], return_df=True)
+
             st.write("**Ljung-Box Test**")
             st.dataframe(ljung_box_result)
             if (ljung_box_result['lb_pvalue'] > 0.05).all():
                 st.success("Residual adalah White Noise (gagal menolak H0).")
             else:
                 st.error("Residual bukan White Noise (menolak H0).")
-    
-            # Uji Heteroskedastisitas - Goldfeld Quandt
-            x_train_const = add_constant(x_train)
-            gq_test = het_goldfeldquandt(residual, x_train_const)
+
             st.write("**Goldfeld-Quandt Test**")
             st.write(f"Statistik GQ: {gq_test[0]:.8f}")
-            st.write("P-value     :", gq_test[1])
+            st.write(f"P-value     : {gq_test[1]:.8f}")
             if gq_test[1] <= 0.05:
                 st.error("Ada heteroskedastisitas (tolak H0)")
             else:
                 st.success("Tidak ada heteroskedastisitas")
-            
+
+
+ 
   # ===== TAB PREDIKSI & EVALUASI ===== #
   with tab_predeval:
     if uploaded_file is None:
