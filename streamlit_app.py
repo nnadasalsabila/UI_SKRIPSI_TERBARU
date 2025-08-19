@@ -637,8 +637,6 @@ elif menu == "📊 Pemodelan & Prediksi":
                     st.error("Ada heteroskedastisitas (tolak H0)")
                 else:
                     st.success("Tidak ada heteroskedastisitas")
-            else:
-            st.info("Klik tombol untuk menjalankan uji diagnostik residual")
  
   # ===== TAB PREDIKSI & EVALUASI ===== #
   with tab_predeval:
