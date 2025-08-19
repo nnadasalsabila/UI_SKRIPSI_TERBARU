@@ -491,8 +491,8 @@ elif menu == "📊 Pemodelan & Prediksi":
                   # Tampilkan hasil evaluasi jika sudah ada
                   if "mape_arima_train" in st.session_state and "mape_arima_test" in st.session_state:
                       st.subheader("📊 Hasil Evaluasi Model")
-                      st.write(f"**MAPE Train:** {st.session_state.mape_train:.2f}%")
-                      st.write(f"**MAPE Test :** {st.session_state.mape_test:.2f}%")
+                      st.write(f"**MAPE Train:** {st.session_state.mape_arima_train:.2f}%")
+                      st.write(f"**MAPE Test :** {st.session_state.mape_arima_test:.2f}%")
               else:
                   st.info("Silahkan jalankan ARIMA untuk melihat hasil.")
             
