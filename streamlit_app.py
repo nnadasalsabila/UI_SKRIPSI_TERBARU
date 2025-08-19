@@ -440,11 +440,39 @@ elif menu == "📊 Pemodelan & Prediksi":
                           st.error("Ada heteroskedastisitas (tolak H0).")
                       else:
                           st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
+                  # === PREDIKSI & EVALUASI MAPE ===
+                  if st.button("Lakukan Prediksi & Evaluasi (MAPE)"):
+                      from sklearn.metrics import mean_absolute_percentage_error
   
+                      # Prediksi train
+                      pred_train = st.session_state.arima_best_model.predict(
+                          start=y_train_arima.index[0],
+                          end=y_train_arima.index[-1],
+                          dynamic=False
+                      )
+                      # Prediksi test
+                      pred_test = st.session_state.arima_best_model.predict(
+                          start=y_test_arima.index[0],
+                          end=y_test_arima.index[-1],
+                          dynamic=False
+                      )
+  
+                      # Hitung MAPE
+                      mape_train = mean_absolute_percentage_error(y_train_arima, pred_train) * 100
+                      mape_test = mean_absolute_percentage_error(y_test_arima, pred_test) * 100
+  
+                      # Simpan ke session_state
+                      st.session_state.mape_train = mape_train
+                      st.session_state.mape_test = mape_test
+  
+                  # Tampilkan hasil evaluasi jika sudah ada
+                  if "mape_train" in st.session_state and "mape_test" in st.session_state:
+                      st.subheader("📊 Hasil Evaluasi Model")
+                      st.write(f"**MAPE Train:** {st.session_state.mape_train:.2f}%")
+                      st.write(f"**MAPE Test :** {st.session_state.mape_test:.2f}%")
               else:
                   st.info("Silahkan jalankan ARIMA untuk melihat hasil.")
-
-
+            
   # ===== TAB PEMODELAN ARIMAX ===== #
   with tab_arimax:
     if uploaded_file is None:
