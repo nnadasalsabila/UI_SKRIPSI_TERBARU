@@ -409,11 +409,30 @@ elif menu == "📊 Pemodelan & Prediksi":
   
                       x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
                       x_dummy_const = add_constant(x_dummy)
-  
+                  
                       residual_arima = st.session_state.arima_best_model.resid
-  
+                  
                       # Uji KS
                       ks_stat, ks_p_value = stats.kstest(residual_arima, 'norm', args=(0, 1))
+                  
+                      # Uji Ljung-Box
+                      ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
+                  
+                      # Uji Goldfeld-Quandt
+                      gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
+                  
+                      # Simpan ke session_state
+                      st.session_state["diagnostic_results"] = {
+                          "ks": (ks_stat, ks_p_value),
+                          "ljungbox": ljung_box_result,
+                          "gq": gq_test_arima
+                      }
+                  
+                  # Tampilkan hasil diagnostik jika sudah ada
+                  if "diagnostic_results" in st.session_state:
+                      st.subheader("🧪 Hasil Uji Diagnostik")
+                  
+                      ks_stat, ks_p_value = st.session_state["diagnostic_results"]["ks"]
                       st.write(f"**Kolmogorov-Smirnov Test**")
                       st.write(f"Statistik KS: {ks_stat:.8f}")
                       st.write(f"P-value     : {ks_p_value:.8f}")
@@ -421,18 +440,16 @@ elif menu == "📊 Pemodelan & Prediksi":
                           st.success("Residual terdistribusi normal (gagal menolak H0).")
                       else:
                           st.error("Residual tidak terdistribusi normal (menolak H0).")
-  
-                      # Uji White Noise - Ljung Box
-                      ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
+                  
+                      ljung_box_result = st.session_state["diagnostic_results"]["ljungbox"]
                       st.write("**Ljung-Box Test**")
                       st.dataframe(ljung_box_result)
                       if (ljung_box_result['lb_pvalue'] > 0.05).all():
                           st.success("Residual adalah White Noise (gagal menolak H0).")
                       else:
                           st.error("Residual bukan White Noise (menolak H0).")
-  
-                      # Uji Goldfeld-Quandt
-                      gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
+                  
+                      gq_test_arima = st.session_state["diagnostic_results"]["gq"]
                       st.write("**Goldfeld-Quandt Test**")
                       st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
                       st.write(f"P-value     : {gq_test_arima[1]:.8f}")
@@ -440,7 +457,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                           st.error("Ada heteroskedastisitas (tolak H0).")
                       else:
                           st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
-                  
+
                   # === EVALUASI MAPE ARIMA ===
                   if st.button("Lakukan Evaluasi (MAPE)"):
                       import numpy as np
