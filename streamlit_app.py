@@ -763,84 +763,117 @@ elif menu == "📊 Pemodelan & Prediksi":
       st.header("📊 Prediksi & Evaluasi Model")
   
       # =========================
-      # 2. Forecast Masa Mendatang
+      # 1. Buat Eksogen Masa Depan
       # =========================
-      st.subheader("Prediksi Masa Mendatang (Forecast) dengan Model ARIMAX")
+      st.subheader("🔧 Buat Eksogen Masa Depan")
   
-      n_forecast = 8
-      future_dates = pd.date_range(start='2024-12-31', periods=n_forecast, freq='D')
+      if st.button("Buat Eksogen Masa Depan"):
+          n_forecast = 8
+          future_dates = pd.date_range(start='2024-12-31', periods=n_forecast, freq='D')
   
-      # Tanggal Idul Adha & Natal
-      idul_adha_dates = [
-          pd.Timestamp('2022-07-10'),
-          pd.Timestamp('2023-06-29'),
-          pd.Timestamp('2024-06-17'),
-          pd.Timestamp('2025-06-06')
-      ]
-      natal_dates = [
-          pd.Timestamp('2022-12-25'),
-          pd.Timestamp('2023-12-25'),
-          pd.Timestamp('2024-12-25'),
-          pd.Timestamp('2025-12-25')
-      ]
+          # Daftar tanggal Idul Adha
+          idul_adha_dates = [
+              pd.Timestamp('2022-07-10'),
+              pd.Timestamp('2023-06-29'),
+              pd.Timestamp('2024-06-17'),
+              pd.Timestamp('2025-06-06')
+          ]
   
-      # Range Idul Adha ±7 hari
-      idul_adha_ranges = []
-      for d in idul_adha_dates:
-          start_range = d - pd.Timedelta(days=7)
-          end_range = d + pd.Timedelta(days=7)
-          idul_adha_ranges.extend(pd.date_range(start=start_range, end=end_range))
-      idul_adha_ranges = set(idul_adha_ranges)
+          # Daftar tanggal Natal
+          natal_dates = [
+              pd.Timestamp('2022-12-25'),
+              pd.Timestamp('2023-12-25'),
+              pd.Timestamp('2024-12-25'),
+              pd.Timestamp('2025-12-25')
+          ]
   
-      # Range Natal ±7 hari
-      natal_ranges = []
-      for d in natal_dates:
-          start_range = d - pd.Timedelta(days=7)
-          end_range = d + pd.Timedelta(days=7)
-          natal_ranges.extend(pd.date_range(start=start_range, end=end_range))
-      natal_ranges = set(natal_ranges)
+          # Range Idul Adha ±7 hari
+          idul_adha_ranges = []
+          for d in idul_adha_dates:
+              start_range = d - pd.Timedelta(days=7)
+              end_range = d + pd.Timedelta(days=7)
+              idul_adha_ranges.extend(pd.date_range(start=start_range, end=end_range))
+          idul_adha_ranges = set(idul_adha_ranges)
   
-      # Exogenous future
-      future_exog = pd.DataFrame({
-          'X1': [1 if date in idul_adha_ranges else 0 for date in future_dates],
-          'X2': [1 if date in natal_ranges else 0 for date in future_dates]
-      }, index=future_dates)
+          # Range Natal ±7 hari
+          natal_ranges = []
+          for d in natal_dates:
+              start_range = d - pd.Timedelta(days=7)
+              end_range = d + pd.Timedelta(days=7)
+              natal_ranges.extend(pd.date_range(start=start_range, end=end_range))
+          natal_ranges = set(natal_ranges)
   
-      # Forecast dengan ARIMAX
-      forecast = result_312.forecast(steps=n_forecast, exog=future_exog)
-      forecast.index = future_dates
+          # Exogenous future
+          future_exog = pd.DataFrame({
+              'X1': [1 if date in idul_adha_ranges else 0 for date in future_dates],
+              'X2': [1 if date in natal_ranges else 0 for date in future_dates]
+          }, index=future_dates)
   
-      # Tampilkan hasil tabel forecast
-      forecast_df = pd.DataFrame({
-          'Tanggal': forecast.index,
-          'Prediksi_ARIMAX': forecast.values
-      })
-      st.dataframe(forecast_df)
+          # Simpan di session_state
+          st.session_state["future_dates"] = future_dates
+          st.session_state["future_exog"] = future_exog
+  
+          st.success("✅ Eksogen masa depan berhasil dibuat!")
+          st.dataframe(future_exog)
   
       # =========================
-      # 3. Visualisasi Forecast
+      # 2. Forecast Masa Mendatang (dengan ARIMAX)
       # =========================
-      st.subheader("Visualisasi Prediksi Masa Mendatang")
+      st.subheader("📈 Prediksi Masa Mendatang dengan ARIMAX")
   
-      fig_forecast, ax = plt.subplots(figsize=(15, 6))
+      if st.button("Prediksi Mendatang (Forecast ARIMAX)"):
+          if "future_exog" not in st.session_state:
+              st.error("❌ Harap buat eksogen masa depan terlebih dahulu!")
+          else:
+              n_forecast = len(st.session_state["future_exog"])
+              future_dates = st.session_state["future_dates"]
+              future_exog = st.session_state["future_exog"]
   
-      # Data aktual
-      ax.plot(pd.concat([y_train, y_test]), label="Data Aktual (Train+Test)", color="black")
+              # Forecast dengan best model ARIMAX
+              forecast = st.session_state["arimax_best_model"].forecast(
+                  steps=n_forecast, exog=future_exog
+              )
+              forecast.index = future_dates
   
-      # Prediksi test
-      ax.plot(pred_test_arimax, label="Prediksi Test (ARIMAX)", color="red")
+              # Simpan hasil forecast
+              forecast_df = pd.DataFrame({
+                  "Tanggal": forecast.index,
+                  "Prediksi_ARIMAX": forecast.values
+              })
+              st.session_state["forecast_arimax"] = forecast
+              st.session_state["forecast_df_arimax"] = forecast_df
   
-      # Forecast masa depan
-      ax.plot(forecast, label="Forecast Masa Depan (ARIMAX)", color="green")
+              st.success("✅ Forecast masa depan berhasil dibuat!")
+              st.dataframe(forecast_df)
   
-      # Garis pembatas
-      ax.axvline(y_test.index[0], color="orange", linestyle="--", label="Train/Test Split")
-      ax.axvline(forecast.index[0], color="purple", linestyle="--", label="Awal Forecast")
+              # Visualisasi
+              fig_forecast, ax = plt.subplots(figsize=(15, 6))
   
-      ax.set_title("Prediksi Harga Cabai Keriting (Train, Test, dan Forecast)")
-      ax.set_xlabel("Tanggal")
-      ax.set_ylabel("Harga")
-      ax.legend()
-      ax.grid()
-      plt.tight_layout()
-      st.pyplot(fig_forecast)
+              # Data aktual (train + test)
+              ax.plot(pd.concat([y_train, y_test]), label="Data Aktual (Train+Test)", color="black")
+  
+              # Prediksi test
+              if "pred_test_arimax" in st.session_state:
+                  ax.plot(st.session_state["pred_test_arimax"], label="Prediksi Test (ARIMAX)", color="red")
+  
+              # Forecast masa depan
+              ax.plot(forecast, label="Forecast Masa Depan (ARIMAX)", color="green")
+  
+              # Garis pembatas
+              ax.axvline(y_test.index[0], color="orange", linestyle="--", label="Train/Test Split")
+              ax.axvline(forecast.index[0], color="purple", linestyle="--", label="Awal Forecast")
+  
+              ax.set_title("Prediksi Harga Cabai Keriting (Train, Test, dan Forecast)")
+              ax.set_xlabel("Tanggal")
+              ax.set_ylabel("Harga")
+              ax.legend()
+              ax.grid()
+              plt.tight_layout()
+              st.pyplot(fig_forecast)
+  
+      # =========================
+      # 3. Tampilkan hasil jika sudah ada
+      # =========================
+      if "forecast_df_arimax" in st.session_state:
+          st.subheader("📊 Hasil Forecast (Tersimpan)")
+          st.dataframe(st.session_state["forecast_df_arimax"])
