@@ -692,64 +692,6 @@ elif menu == "📊 Pemodelan & Prediksi":
       st.header("📊 Prediksi & Evaluasi Model")
   
       # =========================
-      # 1. Prediksi Data Test
-      # =========================
-      st.subheader("Perbandingan Prediksi ARIMA dan ARIMAX pada Data Test")
-      
-      # Guard agar y_test/y_test_arima & x_test tersedia
-      if 'y_test' not in locals() or 'x_test' not in locals():
-          st.warning("Silakan lakukan Splitting Data terlebih dahulu.")
-      else:
-          # --- Prediksi ARIMA ---
-          pred_test_arima = None
-          if "arima_best_model" in st.session_state and st.session_state["arima_best_model"] is not None and 'y_test_arima' in locals():
-              best_model_arima = st.session_state["arima_best_model"]
-              pred_test_arima = best_model_arima.predict(
-                  start=y_test_arima.index[0],
-                  end=y_test_arima.index[-1],
-                  dynamic=False
-              )
-          else:
-              st.warning("Model ARIMA belum dijalankan. Silakan jalankan ARIMA terlebih dahulu.")
-      
-          # --- Prediksi ARIMAX ---
-          pred_test_arimax = None
-          if "arimax_best_model" in st.session_state and st.session_state["arimax_best_model"] is not None:
-              best_model_arimax = st.session_state["arimax_best_model"]
-              pred_test_arimax = best_model_arimax.predict(
-                  start=y_test.index[0],
-                  end=y_test.index[-1],
-                  exog=x_test,
-                  dynamic=False
-              )
-          else:
-              st.warning("Model ARIMAX belum dijalankan. Silakan jalankan ARIMAX terlebih dahulu.")
-      
-          # --- Gabungkan hasil yang tersedia ---
-          hasil_cols = {"Tanggal": y_test.index, "Aktual": y_test.values}
-          if pred_test_arima is not None:
-              hasil_cols["Pred_ARIMA"] = pred_test_arima.values
-          if pred_test_arimax is not None:
-              hasil_cols["Pred_ARIMAX"] = pred_test_arimax.values
-      
-          hasil_test_df = pd.DataFrame(hasil_cols)
-          st.dataframe(hasil_test_df)
-      
-          # --- Plot ---
-          fig_test, ax = plt.subplots(figsize=(12, 5))
-          ax.plot(y_test, label="Data Aktual")
-          if pred_test_arima is not None:
-              ax.plot(pred_test_arima, label="Prediksi ARIMA")
-          if pred_test_arimax is not None:
-              ax.plot(pred_test_arimax, label="Prediksi ARIMAX")
-          ax.set_title("Perbandingan Prediksi Data Test")
-          ax.set_xlabel("Tanggal")
-          ax.set_ylabel("Harga")
-          ax.legend()
-          ax.grid()
-          st.pyplot(fig_test)
-  
-      # =========================
       # 2. Forecast Masa Mendatang
       # =========================
       st.subheader("Prediksi Masa Mendatang (Forecast) dengan Model ARIMAX")
