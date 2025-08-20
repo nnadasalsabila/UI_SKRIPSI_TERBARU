@@ -723,6 +723,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                   st.session_state["mape_arimax_train"] = mape_train
                   st.session_state["mape_arimax_test"] = mape_test
                   st.session_state["pred_test_arimax"] = pred_test
+                  st.session_state["pred_train_arimax"] = pred_train
                   st.session_state["y_test_arimax"] = y_test
               
                   # ===============================
@@ -813,73 +814,61 @@ elif menu == "📊 Pemodelan & Prediksi":
           st.success("✅ Eksogen masa depan berhasil dibuat!")
   
       # Tampilkan eksogen jika sudah ada (tidak hilang)
-      if "future_exog" in st.session_state:
-          st.dataframe(st.session_state["future_exog"])
-  
-      # =========================
-      # 2. Forecast Masa Mendatang (dengan ARIMAX)
-      # =========================
-      st.subheader("📈 Prediksi Masa Mendatang dengan ARIMAX")
-  
-      if st.button("Prediksi Mendatang (Forecast ARIMAX)"):
-          if "future_exog" not in st.session_state:
-              st.error("❌ Harap buat eksogen masa depan terlebih dahulu!")
-          else:
-              n_forecast = len(st.session_state["future_exog"])
-              future_dates = st.session_state["future_dates"]
-              future_exog = st.session_state["future_exog"]
-  
-              # Forecast dengan best model ARIMAX
-              forecast = st.session_state["arimax_best_model"].forecast(
-                  steps=n_forecast, exog=future_exog
-              )
-              forecast.index = future_dates
-  
-              # Simpan hasil forecast
-              forecast_df = pd.DataFrame({
-                  "Tanggal": forecast.index,
-                  "Prediksi_ARIMAX": forecast.values
-              })
-              st.session_state["forecast_arimax"] = forecast
-              st.session_state["forecast_df_arimax"] = forecast_df
-              st.success("✅ Forecast masa depan berhasil dibuat!")
-  
-              # === Visualisasi sesuai permintaan ===
-              plt.figure(figsize=(15, 6))
-  
-              # Data aktual gabungan
-              plt.plot(pd.concat([y_train, y_test]),
-                       label='Data Aktual (Train & Test)', color='black')
-  
-              # Prediksi train (mulai 2024-12-01 biar rapih)
-              plt.plot(pred_train.loc[pred_train.index >= '2024-12-01'],
-                       label='Prediksi Train', color='blue')
-  
-              # Prediksi test
-              plt.plot(pred_test, label='Prediksi Test', color='red')
-  
-              # Forecast
-              plt.plot(forecast, label='Forecast 7 Hari ke Depan', color='green')
-  
-              # Garis pemisah
-              plt.axvline(y_test.index[0], color='orange', linestyle='--', label='Train/Test Split')
-              plt.axvline(forecast.index[0], color='purple', linestyle='--', label='Awal Forecast Masa Depan')
-  
-              plt.title('Prediksi Harga Cabai Keriting (Train, Test, dan Forecast Masa Depan) Mulai Desember 2024')
-              plt.xlabel('Tanggal')
-              plt.ylabel('Harga')
-              plt.legend()
-              plt.grid()
-  
-              # Batas sumbu x
-              plt.xlim(pd.to_datetime('2024-12-01'), pd.to_datetime('2025-01-07'))
-  
-              plt.tight_layout()
-              st.pyplot(plt)
-  
-      # =========================
-      # 3. Tampilkan hasil jika sudah ada (satu kali saja)
-      # =========================
-      if "forecast_df_arimax" in st.session_state:
-          st.subheader("📊 Hasil Forecast (Tersimpan)")
-          st.dataframe(st.session_state["forecast_df_arimax"])
+if st.button("Prediksi Mendatang (Forecast ARIMAX)"):
+    if "future_exog" not in st.session_state:
+        st.error("❌ Harap buat eksogen masa depan terlebih dahulu!")
+    else:
+        n_forecast = len(st.session_state["future_exog"])
+        future_dates = st.session_state["future_dates"]
+        future_exog = st.session_state["future_exog"]
+
+        # Forecast dengan best model ARIMAX
+        forecast = st.session_state["arimax_best_model"].forecast(
+            steps=n_forecast, exog=future_exog
+        )
+        forecast.index = future_dates
+
+        # Simpan hasil forecast
+        forecast_df = pd.DataFrame({
+            "Tanggal": forecast.index,
+            "Prediksi_ARIMAX": forecast.values
+        })
+        st.session_state["forecast_arimax"] = forecast
+        st.session_state["forecast_df_arimax"] = forecast_df
+        st.success("✅ Forecast masa depan berhasil dibuat!")
+
+        # === Visualisasi sesuai permintaan ===
+        fig, ax = plt.subplots(figsize=(15, 6))
+
+        # Data aktual gabungan
+        ax.plot(pd.concat([y_train, y_test]),
+                label='Data Aktual (Train & Test)', color='black')
+
+        # Prediksi train (ambil dari session_state)
+        if "pred_train_arimax" in st.session_state:
+            ax.plot(st.session_state["pred_train_arimax"]
+                    .loc[st.session_state["pred_train_arimax"].index >= '2024-12-01'],
+                    label='Prediksi Train', color='blue')
+
+        # Prediksi test
+        if "pred_test_arimax" in st.session_state:
+            ax.plot(st.session_state["pred_test_arimax"],
+                    label='Prediksi Test', color='red')
+
+        # Forecast
+        ax.plot(forecast, label='Forecast 7 Hari ke Depan', color='green')
+
+        # Garis pemisah
+        ax.axvline(y_test.index[0], color='orange', linestyle='--', label='Train/Test Split')
+        ax.axvline(forecast.index[0], color='purple', linestyle='--', label='Awal Forecast Masa Depan')
+
+        ax.set_title('Prediksi Harga Cabai Keriting (Train, Test, dan Forecast Masa Depan) Mulai Desember 2024')
+        ax.set_xlabel('Tanggal')
+        ax.set_ylabel('Harga')
+        ax.legend()
+        ax.grid()
+
+        # Batas sumbu x
+        ax.set_xlim(pd.to_datetime('2024-12-01'), pd.to_datetime('2025-01-07'))
+
+        st.pyplot(fig)
