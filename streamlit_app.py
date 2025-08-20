@@ -503,12 +503,27 @@ elif menu == "📊 Pemodelan & Prediksi":
                       st.session_state.test_arima_new = test_arima_new
                   
                       # ===============================
-                      # 4. Visualisasi Prediksi Test
+                      # 4. Simpan hasil dataframe
                       # ===============================
+                      hasil_df = pd.DataFrame({
+                          'Tanggal': test_arima_new.index,
+                          'Aktual': test_arima_new.values,
+                          'Prediksi': pred_test.values
+                      })
+                      st.session_state.hasil_df_arima = hasil_df
+                  
+                  # ===============================
+                  # TAMPILKAN HASIL JIKA SUDAH ADA
+                  # ===============================
+                  if "mape_arima_train" in st.session_state and "mape_arima_test" in st.session_state:
+                      st.subheader("📊 Hasil Evaluasi Model")
+                      st.write(f"**MAPE Train:** {st.session_state.mape_arima_train:.2f}%")
+                      st.write(f"**MAPE Test :** {st.session_state.mape_arima_test:.2f}%")
+                  
                       st.subheader("📉 Visualisasi Prediksi pada Data Test")
                       fig, ax = plt.subplots(figsize=(12, 5))
-                      ax.plot(test_arima_new, label='Data Test (Aktual)', color='red')
-                      ax.plot(pred_test, label='Prediksi Test', color='blue')
+                      ax.plot(st.session_state.test_arima_new, label='Data Test (Aktual)', color='red')
+                      ax.plot(st.session_state.pred_test_arima, label='Prediksi Test', color='blue')
                       ax.set_title('Prediksi Data Test')
                       ax.set_xlabel('Tanggal')
                       ax.set_ylabel('Harga')
@@ -516,15 +531,8 @@ elif menu == "📊 Pemodelan & Prediksi":
                       ax.grid(True)
                       st.pyplot(fig)
                   
-                      # ===============================
-                      # 5. Tampilkan DataFrame Hasil Prediksi
-                      # ===============================
-                      hasil_df = pd.DataFrame({
-                          'Tanggal': test_arima_new.index,
-                          'Aktual': test_arima_new.values,
-                          'Prediksi': pred_test.values
-                      })
-                      st.dataframe(hasil_df)
+                      # Tampilkan DataFrame Hasil Prediksi
+                      st.dataframe(st.session_state.hasil_df_arima)
 
             
   # ===== TAB PEMODELAN ARIMAX ===== #
