@@ -695,15 +695,17 @@ elif menu == "📊 Pemodelan & Prediksi":
       # 1. Prediksi Data Test
       # =========================
       st.subheader("Perbandingan Prediksi ARIMA dan ARIMAX pada Data Test")
-      # Ambil model terbaik dari session_state
-      best_model = st.session_state.arima_best_model  
-      # Prediksi dengan ARIMA (tanpa exog)
-      pred_test_arima = best_model.predict(
-          start=y_test_arima.index[0],
-          end=y_test_arima.index[-1],
-          dynamic=False
-      )
-  
+      if "arima_best_model" in st.session_state:
+          best_model = st.session_state.arima_best_model  
+          # Prediksi dengan ARIMA (tanpa exog)
+          pred_test_arima = best_model.predict(
+              start=y_test_arima.index[0],
+              end=y_test_arima.index[-1],
+              dynamic=False
+          )
+      else:
+          st.warning("Model ARIMA belum dijalankan. Silakan jalankan ARIMA terlebih dahulu.")
+   
       # Prediksi dengan ARIMAX (pakai exog)
       pred_test_arimax = arimax_best_model.predict(
           start=y_test.index[0],
