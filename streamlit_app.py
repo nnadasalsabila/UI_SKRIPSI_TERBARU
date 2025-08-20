@@ -461,40 +461,71 @@ elif menu == "📊 Pemodelan & Prediksi":
                   # === EVALUASI MAPE ARIMA ===
                   if st.button("Lakukan Evaluasi (MAPE)"):
                       import numpy as np
-
+                  
                       # Fungsi MAPE manual
                       def mean_absolute_percentage_error(y_true, y_pred):
                           y_true, y_pred = np.array(y_true), np.array(y_pred)
                           mask = y_true != 0  # hindari pembagian nol
                           return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
-  
-                      # Prediksi train
+                  
+                      # ===============================
+                      # 1. Split ulang dengan new_split_date
+                      # ===============================
+                      new_split_date = '2024-12-25'
+                      data.index = pd.to_datetime(data.index)
+                      train_arima_new = data['Harga'].loc[data.index < new_split_date]
+                      test_arima_new = data['Harga'].loc[data.index >= new_split_date]
+                  
+                      # ===============================
+                      # 2. Prediksi untuk data train & test
+                      # ===============================
                       pred_train = st.session_state.arima_best_model.predict(
-                          start=y_train_arima.index[0],
-                          end=y_train_arima.index[-1],
+                          start=train_arima_new.index[0],
+                          end=train_arima_new.index[-1],
                           dynamic=False
                       )
-                      # Prediksi test
                       pred_test = st.session_state.arima_best_model.predict(
-                          start=y_test_arima.index[0],
-                          end=y_test_arima.index[-1],
+                          start=test_arima_new.index[0],
+                          end=test_arima_new.index[-1],
                           dynamic=False
                       )
-                      # Hitung MAPE
-                      mape_arima_train = mean_absolute_percentage_error(y_train_arima, pred_train)
-                      mape_arima_test = mean_absolute_percentage_error(y_test_arima, pred_test)
-  
+                  
+                      # ===============================
+                      # 3. Hitung MAPE
+                      # ===============================
+                      mape_arima_train = mean_absolute_percentage_error(train_arima_new, pred_train)
+                      mape_arima_test = mean_absolute_percentage_error(test_arima_new, pred_test)
+                  
                       # Simpan ke session_state
                       st.session_state.mape_arima_train = mape_arima_train
                       st.session_state.mape_arima_test = mape_arima_test
-  
-                  # Tampilkan hasil evaluasi jika sudah ada
-                  if "mape_arima_train" in st.session_state and "mape_arima_test" in st.session_state:
-                      st.subheader("📊 Hasil Evaluasi Model")
-                      st.write(f"**MAPE Train:** {st.session_state.mape_arima_train:.2f}%")
-                      st.write(f"**MAPE Test :** {st.session_state.mape_arima_test:.2f}%")
-              else:
-                  st.info("Silahkan jalankan ARIMA untuk melihat hasil.")
+                      st.session_state.pred_test_arima = pred_test
+                      st.session_state.test_arima_new = test_arima_new
+                  
+                      # ===============================
+                      # 4. Visualisasi Prediksi Test
+                      # ===============================
+                      st.subheader("📉 Visualisasi Prediksi pada Data Test")
+                      fig, ax = plt.subplots(figsize=(12, 5))
+                      ax.plot(test_arima_new, label='Data Test (Aktual)', color='red')
+                      ax.plot(pred_test, label='Prediksi Test', color='blue')
+                      ax.set_title('Prediksi Data Test')
+                      ax.set_xlabel('Tanggal')
+                      ax.set_ylabel('Harga')
+                      ax.legend()
+                      ax.grid(True)
+                      st.pyplot(fig)
+                  
+                      # ===============================
+                      # 5. Tampilkan DataFrame Hasil Prediksi
+                      # ===============================
+                      hasil_df = pd.DataFrame({
+                          'Tanggal': test_arima_new.index,
+                          'Aktual': test_arima_new.values,
+                          'Prediksi': pred_test.values
+                      })
+                      st.dataframe(hasil_df)
+
             
   # ===== TAB PEMODELAN ARIMAX ===== #
   with tab_arimax:
