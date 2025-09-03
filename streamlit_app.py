@@ -180,13 +180,36 @@ elif menu == "📊 Pemodelan & Prediksi":
   
               # Tombol untuk melakukan imputasi mean
               if st.button("Lakukan Imputasi Mean"):
-                  # Imputasi hanya untuk kolom numerik
-                  data_imputed = data.fillna(data.mean(numeric_only=True))
+                  # Imputasi hanya untuk kolom Harga
+                  if "Harga" in data.columns:
+                      data["Harga"] = data["Harga"].fillna(data["Harga"].mean())
   
-                  st.subheader("Data Setelah Imputasi Mean")
-                  st.dataframe(data_imputed, use_container_width=True)
+                  # ===== Re-imputasi dummy berdasarkan periode perayaan =====
+                  data['Tanggal'] = pd.to_datetime(data['Tanggal'])
   
-                  st.success("Missing value berhasil ditangani dengan imputasi mean")
+                  # Definisikan periode event (contoh untuk tahun 2021)
+                  idul_adha = pd.date_range("2021-07-13", "2021-07-27")
+                  natal = pd.date_range("2021-12-18", "2021-12-31")
+                  tahun_baru = pd.date_range("2020-12-25", "2021-01-07")
+                  imlek = pd.date_range("2021-02-05", "2021-02-19")
+                  idul_fitri = pd.date_range("2021-05-07", "2021-05-21")
+  
+                  # Mapping dummy
+                  if "Idul Adha" in data.columns:
+                      data['Idul Adha'] = data['Tanggal'].isin(idul_adha).astype(int)
+                  if "Natal" in data.columns:
+                      data['Natal'] = data['Tanggal'].isin(natal).astype(int)
+                  if "Tahun Baru" in data.columns:
+                      data['Tahun Baru'] = data['Tanggal'].isin(tahun_baru).astype(int)
+                  if "Imlek" in data.columns:
+                      data['Imlek'] = data['Tanggal'].isin(imlek).astype(int)
+                  if "Idul Fitri" in data.columns:
+                      data['Idul Fitri'] = data['Tanggal'].isin(idul_fitri).astype(int)
+  
+                  # Tampilkan hasil
+                  st.subheader("Data Setelah Imputasi Mean + Perbaikan Dummy")
+                  st.dataframe(data, use_container_width=True)
+                  st.success("Missing value berhasil ditangani (Harga → mean, Dummy → periode event)")
   
           st.subheader("📊 Visualisasi Harga Cabai")
           if "Harga" in data.columns:
@@ -197,7 +220,7 @@ elif menu == "📊 Pemodelan & Prediksi":
           st.subheader("Statistik Deskriptif Harga per Tahun")
           if "Harga" in data.columns:
               data_per_tahun = data.copy()
-              data_per_tahun["Tahun"] = data_per_tahun.index.to_period("Y")
+              data_per_tahun["Tahun"] = data_per_tahun["Tanggal"].dt.year
               statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
               st.dataframe(statistik)
           else:
