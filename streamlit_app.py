@@ -157,10 +157,12 @@ elif menu == "📊 Pemodelan & Prediksi":
       st.info("Silahkan unggah file terlebih dahulu.")
 
   # ===== TAB DATA ===== #
+  # ===== TAB DATA ===== #
   # ===== Fungsi untuk membuat dummy berdasarkan kalender =====
   def buat_dummy(tanggal, hari_h):
       return ((tanggal >= hari_h - pd.Timedelta(days=7)) &
               (tanggal <= hari_h + pd.Timedelta(days=7))).astype(int)
+  
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
@@ -195,10 +197,11 @@ elif menu == "📊 Pemodelan & Prediksi":
                       data_imputed["tanggal"] = pd.to_datetime(data_imputed["tanggal"])
   
                       # ===== 2. Imputasi Dummy Berdasarkan Kalender =====
-                      # Definisi tanggal perayaan (contoh tahun 2023, bisa diperluas multi-year)
-                      idul_adha = pd.to_datetime("2021-06-29")
+                      # Definisi tanggal perayaan (contoh tahun 2021)
+                      idul_adha = pd.to_datetime("2021-07-20")
                       natal = pd.to_datetime("2021-12-25")
   
+                      # Overwrite penuh kolom dummy
                       if "dummy_iduladha" in data_imputed.columns:
                           data_imputed["dummy_iduladha"] = buat_dummy(data_imputed["tanggal"], idul_adha)
                       if "dummy_natal" in data_imputed.columns:
