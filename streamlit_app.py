@@ -157,11 +157,7 @@ elif menu == "📊 Pemodelan & Prediksi":
       st.info("Silahkan unggah file terlebih dahulu.")
 
   # ===== TAB DATA ===== #
-  # ===== Fungsi untuk membuat dummy berdasarkan kalender =====
-  def buat_dummy(Tanggal, hari_h):
-      return ((Tanggal >= hari_h - pd.Timedelta(days=7)) &
-              (Tanggal <= hari_h + pd.Timedelta(days=7))).astype(int)
-  
+  # ===== TAB DATA ===== #
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
@@ -182,36 +178,16 @@ elif menu == "📊 Pemodelan & Prediksi":
           else:
               st.warning("Data memiliki missing value")
   
-if st.button("Lakukan Imputasi (Median + Kalender)"):
-    data_imputed = data.copy()
-
-    # Samakan nama kolom jadi lowercase tanpa spasi
-    data_imputed.columns = data_imputed.columns.str.strip().str.lower()
-
-    # ===== 1. Imputasi Harga dengan Median =====
-    if "harga" in data_imputed.columns:
-        imputer = SimpleImputer(strategy="median")
-        data_imputed["harga"] = imputer.fit_transform(data_imputed[["harga"]])
-
-    # ===== 2. Pastikan kolom tanggal ada =====
-    if "tanggal" in data_imputed.columns:
-        data_imputed["tanggal"] = pd.to_datetime(data_imputed["tanggal"])
-
-        # ===== 3. Definisi tanggal perayaan =====
-        idul_adha = pd.to_datetime("2021-07-20")
-        natal = pd.to_datetime("2021-12-25")
-        tahun_baru = pd.to_datetime("2021-01-01")
-
-        # ===== 4. Tambahkan/overwrite kolom dummy =====
-        data_imputed["idul adha"] = buat_dummy(data_imputed["tanggal"], idul_adha)
-        data_imputed["natal"] = buat_dummy(data_imputed["tanggal"], natal)
-        data_imputed["tahun baru"] = buat_dummy(data_imputed["tanggal"], tahun_baru)
-
-    # ===== 5. Hasil Akhir =====
-    st.subheader("Data Setelah Imputasi")
-    st.dataframe(data_imputed, use_container_width=True)
-    st.success("Missing value berhasil ditangani dengan Median (harga) dan Kalender (dummy).")
-
+              # Tombol untuk melakukan imputasi mean
+              if st.button("Lakukan Imputasi Mean"):
+                  # Imputasi hanya untuk kolom numerik
+                  data_imputed = data.fillna(data.mean(numeric_only=True))
+  
+                  st.subheader("Data Setelah Imputasi Mean")
+                  st.dataframe(data_imputed, use_container_width=True)
+  
+                  st.success("Missing value berhasil ditangani dengan imputasi mean")
+  
           st.subheader("📊 Visualisasi Harga Cabai")
           if "Harga" in data.columns:
               st.line_chart(data['Harga'])
