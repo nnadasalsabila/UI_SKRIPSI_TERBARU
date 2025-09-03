@@ -157,7 +157,6 @@ elif menu == "📊 Pemodelan & Prediksi":
       st.info("Silahkan unggah file terlebih dahulu.")
 
   # ===== TAB DATA ===== #
-  # ===== TAB DATA ===== #
   # ===== Fungsi untuk membuat dummy berdasarkan kalender =====
   def buat_dummy(tanggal, hari_h):
       return ((tanggal >= hari_h - pd.Timedelta(days=7)) &
@@ -188,29 +187,29 @@ elif menu == "📊 Pemodelan & Prediksi":
                   data_imputed = data.copy()
   
                   # ===== 1. Imputasi Harga dengan Median =====
-                  if "harga" in data_imputed.columns:
+                  if "Harga" in data_imputed.columns:
                       imputer = SimpleImputer(strategy="median")
-                      data_imputed["harga"] = imputer.fit_transform(data_imputed[["harga"]])
+                      data_imputed["Harga"] = imputer.fit_transform(data_imputed[["Harga"]])
   
                   # Pastikan kolom tanggal ada dan bertipe datetime
-                  if "tanggal" in data_imputed.columns:
-                      data_imputed["tanggal"] = pd.to_datetime(data_imputed["tanggal"])
+                  if "Tanggal" in data_imputed.columns:
+                      data_imputed["Tanggal"] = pd.to_datetime(data_imputed["Tanggal"])
   
                       # ===== 2. Imputasi Dummy Berdasarkan Kalender =====
                       # Definisi tanggal perayaan (contoh tahun 2021)
                       idul_adha = pd.to_datetime("2021-07-20")
                       natal = pd.to_datetime("2021-12-25")
   
-                      # Overwrite penuh kolom dummy
-                      if "dummy_iduladha" in data_imputed.columns:
-                          data_imputed["dummy_iduladha"] = buat_dummy(data_imputed["tanggal"], idul_adha)
-                      if "dummy_natal" in data_imputed.columns:
-                          data_imputed["dummy_natal"] = buat_dummy(data_imputed["tanggal"], natal)
+                      # Overwrite penuh kolom dummy sesuai nama aslinya
+                      if "Idul Adha" in data_imputed.columns:
+                          data_imputed["Idul Adha"] = buat_dummy(data_imputed["Tanggal"], idul_adha)
+                      if "Natal" in data_imputed.columns:
+                          data_imputed["Natal"] = buat_dummy(data_imputed["Tanggal"], natal)
   
                   # ===== Hasil Akhir =====
                   st.subheader("Data Setelah Imputasi")
                   st.dataframe(data_imputed, use_container_width=True)
-                  st.success("Missing value berhasil ditangani dengan Median (harga) dan Kalender (dummy).")
+                  st.success("Missing value berhasil ditangani dengan Median (Harga) dan Kalender (dummy).")
 
           st.subheader("📊 Visualisasi Harga Cabai")
           if "Harga" in data.columns:
