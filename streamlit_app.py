@@ -157,7 +157,6 @@ elif menu == "📊 Pemodelan & Prediksi":
       st.info("Silahkan unggah file terlebih dahulu.")
 
   # ===== TAB DATA ===== #
-  # ===== TAB DATA ===== #
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
@@ -247,6 +246,7 @@ elif menu == "📊 Pemodelan & Prediksi":
           pass
                
   # ===== TAB UJI STASIONERITAS ===== #
+  # ===== TAB UJI STASIONERITAS ===== #
   with tab_stasioneritas:
       if 'data' in locals() and data is not None and not data.empty and "Harga" in data.columns:
           st.subheader("Uji Stasioneritas - Augmented Dickey-Fuller Test")
@@ -280,18 +280,30 @@ elif menu == "📊 Pemodelan & Prediksi":
               for key, value in result[4].items():
                   st.write(f"   {key}: {value:.6f}")
   
+              # Kondisi 1: Data stasioner
               if result[1] <= 0.05:
                   st.success("Interpretasi: Data stasioner")
+  
+                  # Langsung tampilkan plot ACF & PACF untuk data asli
+                  st.subheader("Plot ACF & PACF (Data Asli)")
+                  fig, axes = plt.subplots(1, 2, figsize=(16, 4))
+                  plot_acf(data["Harga"].dropna(), lags=20, ax=axes[0])
+                  axes[0].set_title("ACF - Data Asli")
+                  plot_pacf(data["Harga"].dropna(), lags=20, ax=axes[1])
+                  axes[1].set_title("PACF - Data Asli")
+                  st.pyplot(fig)
+  
+              # Kondisi 2: Data tidak stasioner
               else:
                   st.warning("Interpretasi: Data tidak stasioner, lakukan differencing")
   
-                  # Step 2 - Differencing + langsung Uji ADF kedua
+                  # Button untuk lakukan differencing & uji ADF ulang
                   if st.button("Lakukan Differencing & Uji ADF Kembali"):
                       st.session_state.data_diff = data["Harga"].diff().dropna()
-                      st.session_state.adf_diff_result = adfuller(st.session_state.data_diff.dropna())
+                      st.session_state.adf_diff_result = adfuller(st.session_state.data_diff)
                       st.session_state.adf_diff_done = True
   
-          # Tampilkan hasil ADF setelah differencing (persisten meskipun pindah tab)
+          # Tampilkan hasil ADF setelah differencing
           if st.session_state.adf_diff_done and st.session_state.adf_diff_result is not None:
               result_diff = st.session_state.adf_diff_result
               st.write("### Hasil Uji ADF Setelah Differencing")
@@ -304,17 +316,17 @@ elif menu == "📊 Pemodelan & Prediksi":
   
               if result_diff[1] <= 0.05:
                   st.success("Interpretasi: Data sudah stasioner setelah differencing")
+  
+                  # Plot ACF & PACF setelah differencing
+                  st.subheader("Plot ACF & PACF (Setelah Differencing)")
+                  fig, axes = plt.subplots(1, 2, figsize=(16, 4))
+                  plot_acf(st.session_state.data_diff, lags=20, ax=axes[0])
+                  axes[0].set_title("ACF - Setelah Differencing")
+                  plot_pacf(st.session_state.data_diff, lags=20, ax=axes[1])
+                  axes[1].set_title("PACF - Setelah Differencing")
+                  st.pyplot(fig)
               else:
                   st.error("Interpretasi: Data masih belum stasioner setelah differencing")
-  
-              # Plot ACF & PACF setelah differencing
-              st.subheader("Plot ACF & PACF (Setelah Differencing)")
-              fig, axes = plt.subplots(1, 2, figsize=(16, 4))
-              plot_acf(st.session_state.data_diff, lags=20, ax=axes[0])
-              axes[0].set_title("ACF - Setelah Differencing")
-              plot_pacf(st.session_state.data_diff, lags=20, ax=axes[1])
-              axes[1].set_title("PACF - Setelah Differencing")
-              st.pyplot(fig)
   
       else:
           st.info("Silahkan unggah data terlebih dahulu untuk melakukan uji stasioneritas.")
