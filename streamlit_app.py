@@ -196,8 +196,8 @@ elif menu == "📊 Pemodelan & Prediksi":
   
                       # ===== 2. Imputasi Dummy Berdasarkan Kalender =====
                       # Definisi tanggal perayaan (contoh tahun 2023, bisa diperluas multi-year)
-                      idul_adha = pd.to_datetime("2023-06-29")
-                      natal = pd.to_datetime("2023-12-25")
+                      idul_adha = pd.to_datetime("2021-06-29")
+                      natal = pd.to_datetime("2021-12-25")
   
                       if "dummy_iduladha" in data_imputed.columns:
                           data_imputed["dummy_iduladha"] = buat_dummy(data_imputed["tanggal"], idul_adha)
