@@ -188,7 +188,7 @@ elif menu == "📊 Pemodelan & Prediksi":
   
                   # ===== 1. Imputasi Harga dengan Median =====
                   if "Harga" in data_imputed.columns:
-                      imputer = SimpleImputer(strategy="median")
+                      imputer = SimpleImputer(strategy="mean")
                       data_imputed["Harga"] = imputer.fit_transform(data_imputed[["Harga"]])
   
                   # Pastikan kolom tanggal ada dan bertipe datetime
@@ -199,6 +199,11 @@ elif menu == "📊 Pemodelan & Prediksi":
                       # Definisi tanggal perayaan (contoh tahun 2021)
                       idul_adha = pd.to_datetime("2021-07-20")
                       natal = pd.to_datetime("2021-12-25")
+                   
+                      # Drop dulu kolom lama biar nggak tercampur dengan None
+                      for kolom in ["Idul Adha", "Natal", "Tahun Baru"]:
+                          if kolom in data_imputed.columns:
+                              data_imputed.drop(columns=[kolom], inplace=True)
   
                       # Overwrite penuh kolom dummy sesuai nama aslinya
                       data_imputed["Idul Adha"] = buat_dummy(data_imputed["Tanggal"], idul_adha)
