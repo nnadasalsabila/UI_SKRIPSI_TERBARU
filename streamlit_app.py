@@ -202,7 +202,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       tahun_baru = pd.to_datetime("2020-01-01")
                    
                       # Drop dulu kolom lama biar nggak tercampur dengan None
-                      for kolom in ["Idul Adha", "Natal", Tahun Baru]:
+                      for kolom in ["Idul Adha", "Natal", "Tahun Baru"]:
                           if kolom in data_imputed.columns:
                               data_imputed.drop(columns=[kolom], inplace=True)
   
