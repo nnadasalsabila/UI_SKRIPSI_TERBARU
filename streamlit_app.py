@@ -186,30 +186,27 @@ elif menu == "📊 Pemodelan & Prediksi":
               if st.button("Lakukan Imputasi (Median + Kalender)"):
                   data_imputed = data.copy()
   
-                  # ===== 1. Imputasi Harga dengan Median =====
-                  if "Harga" in data_imputed.columns:
-                      imputer = SimpleImputer(strategy="mean")
-                      data_imputed["Harga"] = imputer.fit_transform(data_imputed[["Harga"]])
-  
-                  # Pastikan kolom tanggal ada dan bertipe datetime
-                  if "Tanggal" in data_imputed.columns:
-                      data_imputed["Tanggal"] = pd.to_datetime(data_imputed["Tanggal"])
-  
-                      # ===== 2. Imputasi Dummy Berdasarkan Kalender =====
-                      # Definisi tanggal perayaan (contoh tahun 2021)
-                      idul_adha = pd.to_datetime("2021-07-20")
-                      natal = pd.to_datetime("2021-12-25")
-                      tahun_baru = pd.to_datetime("2021-01-01")
-                   
-                      # Drop dulu kolom lama biar nggak tercampur dengan None
-                      for kolom in ["Idul Adha", "Natal", "Tahun Baru"]:
-                          if kolom in data_imputed.columns:
-                              data_imputed.drop(columns=[kolom], inplace=True)
-  
-                      # Overwrite penuh kolom dummy sesuai nama aslinya
-                      data_imputed["Idul Adha"] = buat_dummy(data_imputed["Tanggal"], idul_adha)
-                      data_imputed["Natal"] = buat_dummy(data_imputed["Tanggal"], natal)
-                      data_imputed["Tahun Baru"] = buat_dummy(data_imputed["Tanggal"], tahun_baru)
+              # ===== 1. Imputasi Harga dengan Median =====
+              if "Harga" in data_imputed.columns or "harga" in data_imputed.columns:
+                  # Samakan nama kolom jadi lowercase
+                  data_imputed.columns = data_imputed.columns.str.strip().str.lower()
+              
+                  imputer = SimpleImputer(strategy="median")
+                  data_imputed["harga"] = imputer.fit_transform(data_imputed[["harga"]])
+              
+              # Pastikan kolom tanggal ada dan bertipe datetime
+              if "tanggal" in data_imputed.columns:
+                  data_imputed["tanggal"] = pd.to_datetime(data_imputed["tanggal"])
+              
+                  # ===== 2. Imputasi Dummy Berdasarkan Kalender =====
+                  idul_adha = pd.to_datetime("2021-07-20")
+                  natal = pd.to_datetime("2021-12-25")
+                  tahun_baru = pd.to_datetime("2021-01-01")
+              
+                  # Overwrite penuh kolom dummy
+                  data_imputed["idul adha"] = buat_dummy(data_imputed["tanggal"], idul_adha)
+                  data_imputed["natal"] = buat_dummy(data_imputed["tanggal"], natal)
+                  data_imputed["tahun baru"] = buat_dummy(data_imputed["tanggal"], tahun_baru)
   
                   # ===== Hasil Akhir =====
                   st.subheader("Data Setelah Imputasi")
