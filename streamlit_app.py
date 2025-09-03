@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.impute import SimpleImputer
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.arima.model import ARIMA
@@ -155,6 +156,10 @@ elif menu == "📊 Pemodelan & Prediksi":
       st.info("Silahkan unggah file terlebih dahulu.")
 
   # ===== TAB DATA ===== #
+  # ===== Fungsi untuk membuat dummy berdasarkan kalender =====
+  def buat_dummy(tanggal, hari_h):
+      return ((tanggal >= hari_h - pd.Timedelta(days=7)) &
+              (tanggal <= hari_h + pd.Timedelta(days=7))).astype(int)
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
@@ -175,15 +180,33 @@ elif menu == "📊 Pemodelan & Prediksi":
           else:
               st.warning("Data memiliki missing value")
   
-              # Tombol untuk melakukan imputasi mean
-              if st.button("Lakukan Imputasi Mean"):
-                  # Imputasi hanya untuk kolom numerik
-                  data_imputed = data.fillna(data.mean(numeric_only=True))
+              # Tombol untuk melakukan imputasi khusus
+              if st.button("Lakukan Imputasi (Median + Kalender)"):
+                  data_imputed = data.copy()
   
-                  st.subheader("Data Setelah Imputasi Mean")
+                  # ===== 1. Imputasi Harga dengan Median =====
+                  if "harga" in data_imputed.columns:
+                      imputer = SimpleImputer(strategy="median")
+                      data_imputed["harga"] = imputer.fit_transform(data_imputed[["harga"]])
+  
+                  # Pastikan kolom tanggal ada dan bertipe datetime
+                  if "tanggal" in data_imputed.columns:
+                      data_imputed["tanggal"] = pd.to_datetime(data_imputed["tanggal"])
+  
+                      # ===== 2. Imputasi Dummy Berdasarkan Kalender =====
+                      # Definisi tanggal perayaan (contoh tahun 2023, bisa diperluas multi-year)
+                      idul_adha = pd.to_datetime("2023-06-29")
+                      natal = pd.to_datetime("2023-12-25")
+  
+                      if "dummy_iduladha" in data_imputed.columns:
+                          data_imputed["dummy_iduladha"] = buat_dummy(data_imputed["tanggal"], idul_adha)
+                      if "dummy_natal" in data_imputed.columns:
+                          data_imputed["dummy_natal"] = buat_dummy(data_imputed["tanggal"], natal)
+  
+                  # ===== Hasil Akhir =====
+                  st.subheader("Data Setelah Imputasi")
                   st.dataframe(data_imputed, use_container_width=True)
-  
-                  st.success("Missing value berhasil ditangani")
+                  st.success("Missing value berhasil ditangani dengan Median (harga) dan Kalender (dummy).")
 
           st.subheader("📊 Visualisasi Harga Cabai")
           if "Harga" in data.columns:
