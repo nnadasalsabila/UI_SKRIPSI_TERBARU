@@ -172,6 +172,8 @@ elif menu == "📊 Pemodelan & Prediksi":
   
           if missing_values.sum() == 0:
               st.success("Data tidak memiliki missing value")
+          else:
+              st.warning("Data memiliki missing value")
 
           st.subheader("📊 Visualisasi Harga Cabai")
           if "Harga" in data.columns:
