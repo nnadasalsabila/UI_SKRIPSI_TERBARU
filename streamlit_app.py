@@ -158,9 +158,9 @@ elif menu == "📊 Pemodelan & Prediksi":
 
   # ===== TAB DATA ===== #
   # ===== Fungsi untuk membuat dummy berdasarkan kalender =====
-  def buat_dummy(tanggal, hari_h):
-      return ((tanggal >= hari_h - pd.Timedelta(days=7)) &
-              (tanggal <= hari_h + pd.Timedelta(days=7))).astype(int)
+  def buat_dummy(Tanggal, hari_h):
+      return ((Tanggal >= hari_h - pd.Timedelta(days=7)) &
+              (Tanggal <= hari_h + pd.Timedelta(days=7))).astype(int)
   
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
