@@ -251,17 +251,14 @@ elif menu == "📊 Pemodelan & Prediksi":
       if 'data' in locals() and data is not None and not data.empty and "Harga" in data.columns:
           st.subheader("Uji Stasioneritas - Augmented Dickey-Fuller Test")
   
-          # Inisialisasi state
-          if "adf_awal_done" not in st.session_state:
+          # Reset state saat pertama kali buka tab
+          if "reset_flag" not in st.session_state:
               st.session_state.adf_awal_done = False
-          if "adf_awal_result" not in st.session_state:
               st.session_state.adf_awal_result = None
-          if "adf_diff_done" not in st.session_state:
               st.session_state.adf_diff_done = False
-          if "adf_diff_result" not in st.session_state:
               st.session_state.adf_diff_result = None
-          if "data_diff" not in st.session_state:
               st.session_state.data_diff = None
+              st.session_state.reset_flag = True
   
           # Step 1 - Uji ADF awal
           if st.button("Jalankan Uji ADF Awal"):
@@ -269,7 +266,7 @@ elif menu == "📊 Pemodelan & Prediksi":
               st.session_state.adf_awal_result = result
               st.session_state.adf_awal_done = True
   
-          # Tampilkan hasil uji ADF awal jika sudah dijalankan
+          # Tampilkan hasil uji ADF awal jika tombol ditekan
           if st.session_state.adf_awal_done and st.session_state.adf_awal_result is not None:
               result = st.session_state.adf_awal_result
               st.write("### Hasil Uji ADF (Data Asli)")
@@ -303,7 +300,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       st.session_state.adf_diff_result = adfuller(st.session_state.data_diff)
                       st.session_state.adf_diff_done = True
   
-          # Tampilkan hasil ADF setelah differencing
+          # Tampilkan hasil ADF setelah differencing (hanya setelah button diff ditekan)
           if st.session_state.adf_diff_done and st.session_state.adf_diff_result is not None:
               result_diff = st.session_state.adf_diff_result
               st.write("### Hasil Uji ADF Setelah Differencing")
