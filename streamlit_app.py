@@ -175,6 +175,23 @@ elif menu == "📊 Pemodelan & Prediksi":
   
           if missing_values.sum() == 0:
               st.success("Data tidak memiliki missing value")
+  
+              # 🔹 Langsung tampilkan visualisasi & statistik
+              st.subheader("📊 Visualisasi Harga Cabai")
+              if "Harga" in data.columns:
+                  st.line_chart(data['Harga'])
+              else:
+                  st.warning("Kolom 'Harga' tidak ditemukan di data.")
+  
+              st.subheader("Statistik Deskriptif Harga per Tahun")
+              if "Harga" in data.columns:
+                  data_per_tahun = data.copy()
+                  data_per_tahun["Tahun"] = data_per_tahun.index.year
+                  statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
+                  st.dataframe(statistik)
+              else:
+                  st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
+  
           else:
               st.warning("Data memiliki missing value")
   
@@ -211,20 +228,21 @@ elif menu == "📊 Pemodelan & Prediksi":
                   st.dataframe(data, use_container_width=True)
                   st.success("Missing value berhasil ditangani (Harga → mean, Dummy → periode event)")
   
-          st.subheader("📊 Visualisasi Harga Cabai")
-          if "Harga" in data.columns:
-              st.line_chart(data['Harga'])
-          else:
-              st.warning("Kolom 'Harga' tidak ditemukan di data.")
+                  # 🔹 Setelah imputasi baru tampilkan visualisasi & statistik
+                  st.subheader("📊 Visualisasi Harga Cabai")
+                  if "Harga" in data.columns:
+                      st.line_chart(data['Harga'])
+                  else:
+                      st.warning("Kolom 'Harga' tidak ditemukan di data.")
   
-          st.subheader("Statistik Deskriptif Harga per Tahun")
-          if "Harga" in data.columns:
-              data_per_tahun = data.copy()
-              data_per_tahun["Tahun"] = data_per_tahun["Tanggal"].dt.year
-              statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
-              st.dataframe(statistik)
-          else:
-              st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
+                  st.subheader("Statistik Deskriptif Harga per Tahun")
+                  if "Harga" in data.columns:
+                      data_per_tahun = data.copy()
+                      data_per_tahun["Tahun"] = data_per_tahun.index.year
+                      statistik = data_per_tahun.groupby("Tahun")["Harga"].describe()
+                      st.dataframe(statistik)
+                  else:
+                      st.info("Statistik per tahun membutuhkan kolom 'Harga'.")
       else:
           pass
                
