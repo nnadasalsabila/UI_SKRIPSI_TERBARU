@@ -197,11 +197,12 @@ elif menu == "📊 Pemodelan & Prediksi":
   
                       # ===== 2. Imputasi Dummy Berdasarkan Kalender =====
                       # Definisi tanggal perayaan (contoh tahun 2021)
-                      idul_adha = pd.to_datetime("2021-07-20")
-                      natal = pd.to_datetime("2021-12-25")
+                      idul_adha = pd.to_datetime("2020-07-20")
+                      natal = pd.to_datetime("2020-12-25")
+                      tahun_baru = pd.to_datetime("2020-01-01")
                    
                       # Drop dulu kolom lama biar nggak tercampur dengan None
-                      for kolom in ["Idul Adha", "Natal", "Tahun Baru"]:
+                      for kolom in ["Idul Adha", "Natal", Tahun Baru]:
                           if kolom in data_imputed.columns:
                               data_imputed.drop(columns=[kolom], inplace=True)
   
