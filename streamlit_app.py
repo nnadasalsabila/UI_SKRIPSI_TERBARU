@@ -201,10 +201,9 @@ elif menu == "📊 Pemodelan & Prediksi":
                       natal = pd.to_datetime("2021-12-25")
   
                       # Overwrite penuh kolom dummy sesuai nama aslinya
-                      if "Idul Adha" in data_imputed.columns:
-                          data_imputed["Idul Adha"] = buat_dummy(data_imputed["Tanggal"], idul_adha)
-                      if "Natal" in data_imputed.columns:
-                          data_imputed["Natal"] = buat_dummy(data_imputed["Tanggal"], natal)
+                      data_imputed["Idul Adha"] = buat_dummy(data_imputed["Tanggal"], idul_adha)
+                      data_imputed["Natal"] = buat_dummy(data_imputed["Tanggal"], natal)
+                      data_imputed["Tahun Baru"] = buat_dummy(data_imputed["Tanggal"], tahun_baru)
   
                   # ===== Hasil Akhir =====
                   st.subheader("Data Setelah Imputasi")
