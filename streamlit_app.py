@@ -185,7 +185,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       data["Harga"] = data["Harga"].fillna(data["Harga"].mean())
   
                   # ===== Re-imputasi dummy berdasarkan periode perayaan =====
-                  data['Tanggal'] = pd.to_datetime(data['Tanggal'])
+                  data.index = pd.to_datetime(data.index)
   
                   # Definisikan periode event (contoh untuk tahun 2021)
                   idul_adha = pd.date_range("2021-07-13", "2021-07-27")
@@ -196,15 +196,15 @@ elif menu == "📊 Pemodelan & Prediksi":
   
                   # Mapping dummy
                   if "Idul Adha" in data.columns:
-                      data['Idul Adha'] = data['Tanggal'].isin(idul_adha).astype(int)
+                      data['Idul Adha'] = data.index.isin(idul_adha).astype(int)
                   if "Natal" in data.columns:
-                      data['Natal'] = data['Tanggal'].isin(natal).astype(int)
+                      data['Natal'] = data.index.isin(natal).astype(int)
                   if "Tahun Baru" in data.columns:
-                      data['Tahun Baru'] = data['Tanggal'].isin(tahun_baru).astype(int)
+                      data['Tahun Baru'] = data.index.isin(tahun_baru).astype(int)
                   if "Imlek" in data.columns:
-                      data['Imlek'] = data['Tanggal'].isin(imlek).astype(int)
+                      data['Imlek'] = data.index.isin(imlek).astype(int)
                   if "Idul Fitri" in data.columns:
-                      data['Idul Fitri'] = data['Tanggal'].isin(idul_fitri).astype(int)
+                      data['Idul Fitri'] = data.index.isin(idul_fitri).astype(int)
   
                   # Tampilkan hasil
                   st.subheader("Data Setelah Imputasi Mean + Perbaikan Dummy")
