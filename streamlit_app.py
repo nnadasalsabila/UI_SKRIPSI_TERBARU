@@ -159,10 +159,10 @@ elif menu == "📊 Pemodelan & Prediksi":
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
           st.dataframe(data)
-
+  
           st.subheader("Cek Missing Value")
           missing_values = data.isnull().sum()
-          
+  
           # Buat DataFrame dari hasil missing value
           missing_df = pd.DataFrame({
               "Kolom": missing_values.index,
@@ -174,6 +174,16 @@ elif menu == "📊 Pemodelan & Prediksi":
               st.success("Data tidak memiliki missing value")
           else:
               st.warning("Data memiliki missing value")
+  
+              # Tombol untuk melakukan imputasi mean
+              if st.button("Lakukan Imputasi Mean"):
+                  # Imputasi hanya untuk kolom numerik
+                  data_imputed = data.fillna(data.mean(numeric_only=True))
+  
+                  st.subheader("Data Setelah Imputasi Mean")
+                  st.dataframe(data_imputed, use_container_width=True)
+  
+                  st.success("Missing value berhasil ditangani")
 
           st.subheader("📊 Visualisasi Harga Cabai")
           if "Harga" in data.columns:
