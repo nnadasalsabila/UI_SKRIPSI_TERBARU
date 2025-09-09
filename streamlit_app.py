@@ -466,111 +466,104 @@ elif menu == "📊 Pemodelan & Prediksi":
                       st.text(st.session_state.arima_best_summary)
   
                   # UJI DIAGNOSTIK
-                  # ==== UJI DIAGNOSTIK (ganti seluruh blok lama dengan ini) ====
                   if st.button("Lakukan Uji Diagnostik"):
                       import numpy as np
                       import pandas as pd
                       from scipy import stats
                       from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
                       from statsmodels.tools.tools import add_constant
-      
+                  
                       # Ambil series yang definitif dari session_state
-                      y_train_saved = st.session_state.get('y_train')           # dari tab_splitting
+                      y_train_saved = st.session_state.get('y_train')              # dari tab_splitting
                       y_train_arima_saved = st.session_state.get('y_train_arima')  # dari tab_arima
                       residual_arima = st.session_state.arima_best_model.resid
-      
+                  
                       # Helper: bersihkan series
                       def clean_series(s):
                           if s is None:
                               return None
                           s_ser = pd.Series(s).dropna().astype(float).reset_index(drop=True)
                           return s_ser
-      
+                  
                       def run_gq_on(endog_ser):
                           s = clean_series(endog_ser)
                           if s is None or len(s) < 8:
                               return (np.nan, np.nan, np.nan)
                           exog = add_constant(np.arange(len(s)).reshape(-1, 1))
                           return het_goldfeldquandt(s.values, exog)
-      
+                  
                       # Hitung GQ pada kedua input (price dari splitting, price dari arima-tab, dan residual)
                       gq_on_price_split = run_gq_on(y_train_saved)
                       gq_on_price_arima = run_gq_on(y_train_arima_saved)
                       gq_on_resid = run_gq_on(residual_arima)
-      
+                  
                       # Pilih mana yang dipakai: jika komoditas = 'cabai merah' pakai price dari splitting (y_train),
-                      # kalau tidak pakai residual (sebelumnya Anda ingin begitu).
+                      # kalau tidak pakai residual (default).
                       komod = st.session_state.get('komoditas', '').strip().lower()
                       if komod == 'cabai merah':
-                          # gunakan y_train yang disimpan saat splitting (agar cocok dengan skrip Python)
                           gq_used = gq_on_price_split
                           used_label = "Harga (y_train dari splitting)"
                       else:
                           gq_used = gq_on_resid
                           used_label = "Residual ARIMA"
-      
+                  
                       # Uji KS dan Ljung-Box pada residual (standardisasi untuk KS)
                       resid_clean = clean_series(residual_arima)
                       if resid_clean is None or len(resid_clean) == 0:
                           st.error("Residual ARIMA kosong atau tidak tersedia.")
-                      ks_stat, ks_p_value = stats.kstest((resid_clean - resid_clean.mean()) / resid_clean.std(ddof=0), 'norm')
-                      ljung_box_result = acorr_ljungbox(resid_clean, lags=[10,20,30,40], return_df=True)
-      
-                      # Simpan hasil
+                      ks_stat, ks_p_value = stats.kstest(
+                          (resid_clean - resid_clean.mean()) / resid_clean.std(ddof=0),
+                          'norm'
+                      )
+                      ljung_box_result = acorr_ljungbox(resid_clean, lags=[10, 20, 30, 40], return_df=True)
+                  
+                      # Simpan ke session_state
                       st.session_state["diagnostic_results"] = {
-                          "ks": (float(ks_stat), float(ks_p_value)),
+                          "ks": (ks_stat, ks_p_value),
                           "ljungbox": ljung_box_result,
-                          "gq": tuple(float(x) if (x is not None and not pd.isna(x)) else np.nan for x in gq_used),
-                          "gq_all": {
-                              "price_split": tuple(float(x) if (x is not None and not pd.isna(x)) else np.nan for x in gq_on_price_split),
-                              "price_arima": tuple(float(x) if (x is not None and not pd.isna(x)) else np.nan for x in gq_on_price_arima),
-                              "resid": tuple(float(x) if (x is not None and not pd.isna(x)) else np.nan for x in gq_on_resid),
-                          },
-                          "debug": {
-                              "split_date_used": split_date,
-                              "y_train_split_len": int(len(clean_series(y_train_saved))) if y_train_saved is not None else 0,
-                              "y_train_arima_len": int(len(clean_series(y_train_arima_saved))) if y_train_arima_saved is not None else 0,
-                              "resid_len": int(len(resid_clean)) if resid_clean is not None else 0,
-                              "y_train_split_head": clean_series(y_train_saved).head().tolist() if y_train_saved is not None else [],
-                              "y_train_arima_head": clean_series(y_train_arima_saved).head().tolist() if y_train_arima_saved is not None else [],
-                              "resid_head": resid_clean.head().tolist() if resid_clean is not None else []
-                          },
-                          "used_label": used_label
+                          "gq": {
+                              "result": gq_used,          # tuple (stat, pvalue, alternatif)
+                              "used_label": used_label    # string penanda data yang dipakai
+                          }
                       }
-      
-                  # Tampilkan hasil diagnostik (sama format dengan sebelumnya; ambil dari session_state)
+                  
+                  # Tampilkan hasil diagnostik jika sudah ada
                   if "diagnostic_results" in st.session_state:
-                      dr = st.session_state["diagnostic_results"]
                       st.subheader("🧪 Hasil Uji Diagnostik")
-                      ks_stat, ks_p_value = dr["ks"]
-                      st.write("**Kolmogorov-Smirnov Test (residual distandarkan)**")
+                  
+                      # KS
+                      ks_stat, ks_p_value = st.session_state["diagnostic_results"]["ks"]
+                      st.write("**Kolmogorov-Smirnov Test**")
                       st.write(f"Statistik KS: {ks_stat:.8f}")
                       st.write(f"P-value     : {ks_p_value:.8f}")
                       if ks_p_value > 0.05:
                           st.success("Residual terdistribusi normal (gagal menolak H0).")
                       else:
                           st.error("Residual tidak terdistribusi normal (menolak H0).")
-      
-                      st.write("**Ljung-Box Test (residual)**")
-                      st.dataframe(dr["ljungbox"])
-                      if (dr["ljungbox"]['lb_pvalue'] > 0.05).all():
+                  
+                      # Ljung-Box
+                      ljung_box_result = st.session_state["diagnostic_results"]["ljungbox"]
+                      st.write("**Ljung-Box Test**")
+                      st.dataframe(ljung_box_result)
+                      if (ljung_box_result['lb_pvalue'] > 0.05).all():
                           st.success("Residual adalah White Noise (gagal menolak H0).")
                       else:
                           st.error("Residual bukan White Noise (menolak H0).")
-      
-                      st.write("**Goldfeld-Quandt Test (hasil yang dipakai)**")
-                      st.write(f"Digunakan: {dr['used_label']}")
-                      st.write(f"Statistik GQ: {dr['gq'][0]:.8f}")
-                      st.write(f"P-value     : {dr['gq'][1]:.8f}")
-                      if not np.isnan(dr['gq'][1]) and dr['gq'][1] <= 0.05:
+                  
+                      # Goldfeld-Quandt
+                      gq_info = st.session_state["diagnostic_results"]["gq"]
+                      stat_gq, pvalue_gq, alternatif = gq_info["result"]
+                  
+                      st.write("**Goldfeld-Quandt Test**")
+                      st.write(f"Statistik GQ: {stat_gq:.8f}")
+                      st.write(f"P-value     : {pvalue_gq:.8f}")
+                      st.write(f"Alternatif  : {alternatif}")
+                      st.write(f"Digunakan   : {gq_info['used_label']}")
+                  
+                      if pvalue_gq <= 0.05:
                           st.error("Ada heteroskedastisitas (tolak H0).")
                       else:
                           st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
-      
-                      st.write("**Perbandingan GQ (semua input yang dihitung)**")
-                      st.write(f"Price (split) -> stat: {dr['gq_all']['price_split'][0]}, p:{dr['gq_all']['price_split'][1]}")
-                      st.write(f"Price (arima) -> stat: {dr['gq_all']['price_arima'][0]}, p:{dr['gq_all']['price_arima'][1]}")
-                      st.write(f"Residual      -> stat: {dr['gq_all']['resid'][0]}, p:{dr['gq_all']['resid'][1]}")
 
                   # === EVALUASI MAPE ARIMA ===
                   if st.button("Lakukan Prediksi & Evaluasi"):
