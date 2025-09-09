@@ -533,8 +533,9 @@ elif menu == "📊 Pemodelan & Prediksi":
                       # Ambil nama file yang diupload
                       uploaded_file = st.session_state.get("uploaded_file", None)
                       file_name = uploaded_file.name if uploaded_file is not None else ""
+                      file_name_lower = file_name.lower().strip()
                   
-                      if file_name.startswith("Data Cabai Merah"):
+                      if "cabai merah" in file_name_lower:
                           # === CASE CABAI MERAH ===
                           split_date = '2024-12-26'
                           y_train = data['Harga'].loc[data.index < split_date]
@@ -561,7 +562,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                           })
                           used_label = "Cabai Merah (split_date = 2024-12-26)"
                   
-                      elif file_name.startswith("Data Cabai Keriting"):
+                      elif "cabai keriting" in file_name_lower:
                           # === CASE CABAI KERITING ===
                           new_split_date = '2024-12-25'
                           arima_y_train = data['Harga'].loc[data.index < new_split_date]
@@ -589,7 +590,8 @@ elif menu == "📊 Pemodelan & Prediksi":
                           used_label = "Cabai Keriting (new_split_date = 2024-12-25)"
                   
                       else:
-                          st.error("Nama file tidak dikenali. Pastikan sesuai format.")
+                          st.error(f"Nama file tidak dikenali: {file_name}. "
+                                   "Pastikan mengandung kata 'Cabai Merah' atau 'Cabai Keriting'.")
                           st.stop()
                   
                       # Simpan ke session_state
@@ -621,7 +623,6 @@ elif menu == "📊 Pemodelan & Prediksi":
                       st.pyplot(fig)
                   
                       st.dataframe(st.session_state.hasil_df_arima)
-
             
   # ===== TAB PEMODELAN ARIMAX ===== #
   with tab_arimax:
