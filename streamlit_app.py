@@ -135,6 +135,7 @@ elif menu == "📊 Pemodelan & Prediksi":
   tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "🎯 Prediksi Mendatang"])
     
   if uploaded_file:
+      filename = uploaded_file.name
       # Baca file
       if uploaded_file.name.endswith(".csv"):
         data = pd.read_csv(uploaded_file)
@@ -142,8 +143,6 @@ elif menu == "📊 Pemodelan & Prediksi":
         data = pd.read_excel(uploaded_file)
 
       # Pastikan kolom tanggal ada dan jadi index
-      # category = data.iloc[0, 4]  # Row 0 (first row)
-      filename = uploaded_file.name
           
       # Set category based on filename or data
       if "Keriting" in filename:
@@ -170,7 +169,6 @@ elif menu == "📊 Pemodelan & Prediksi":
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
-          # data = data.drop(columns=['Category'], errors='ignore')  # Replace 'Category' with actual column name
           st.dataframe(data)
   
           st.subheader("Cek Missing Value")
