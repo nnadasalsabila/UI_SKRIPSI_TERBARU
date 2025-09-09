@@ -483,7 +483,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
                   
                       # Uji Goldfeld-Quandt
-                      gq_test_arima = het_goldfeldquandt(y_train_arima, x_dummy_const)
+                      gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
                   
                       # Simpan ke session_state
                       st.session_state["diagnostic_results"] = {
