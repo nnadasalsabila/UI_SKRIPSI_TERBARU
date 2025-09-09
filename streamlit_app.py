@@ -142,7 +142,16 @@ elif menu == "📊 Pemodelan & Prediksi":
         data = pd.read_excel(uploaded_file)
 
       # Pastikan kolom tanggal ada dan jadi index
-      category = data.iloc[0, 4]  # Row 0 (first row)
+      # category = data.iloc[0, 4]  # Row 0 (first row)
+      filename = uploaded_file.name
+          
+      # Set category based on filename or data
+      if "Keriting" in filename:
+          category = "Keriting"
+          st.info(f"Category set from filename: {category}")
+      else:
+          category = "Merah"
+       
       data.columns = data.columns.str.strip()
       if 'Tanggal' in data.columns:
         data['Tanggal'] = pd.to_datetime(data['Tanggal'], errors='coerce')
@@ -161,7 +170,7 @@ elif menu == "📊 Pemodelan & Prediksi":
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
-          data = data.drop(columns=['Category'], errors='ignore')  # Replace 'Category' with actual column name
+          # data = data.drop(columns=['Category'], errors='ignore')  # Replace 'Category' with actual column name
           st.dataframe(data)
   
           st.subheader("Cek Missing Value")
