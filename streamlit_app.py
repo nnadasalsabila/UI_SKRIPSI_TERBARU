@@ -534,7 +534,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       uploaded_file = st.session_state.get("uploaded_file", None)
                       file_name = uploaded_file.name if uploaded_file is not None else ""
                   
-                      if "Data Cabai Merah 2021-2024.xlsx" in file_name:
+                      if "Data Cabai Merah 2021-2024" in file_name:
                           # === CASE CABAI MERAH ===
                           split_date = '2024-12-26'
                           y_train = data['Harga'].loc[data.index < split_date]
@@ -561,7 +561,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                           })
                           used_label = "Cabai Merah (split_date = 2024-12-26)"
                   
-                      elif "Data Cabai Keriting 2021-2024.xlsx" in file_name:
+                      elif "Data Cabai Keriting 2021-2024" in file_name:
                           # === CASE CABAI KERITING ===
                           new_split_date = '2024-12-25'
                           arima_y_train = data['Harga'].loc[data.index < new_split_date]
