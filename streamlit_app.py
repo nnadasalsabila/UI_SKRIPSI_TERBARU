@@ -525,91 +525,66 @@ elif menu == "📊 Pemodelan & Prediksi":
                   # === EVALUASI MAPE ARIMA ===
                   if st.button("Lakukan Prediksi & Evaluasi"):
                       import numpy as np
-                      from sklearn.metrics import mean_absolute_percentage_error
                   
-                      # Pastikan index datetime
+                      # Fungsi MAPE manual
+                      def mean_absolute_percentage_error(y_true, y_pred):
+                          y_true, y_pred = np.array(y_true), np.array(y_pred)
+                          mask = y_true != 0  # hindari pembagian nol
+                          return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
+                  
+                      # ===============================
+                      # 1. Split ulang dengan new_split_date
+                      # ===============================
+                      new_split_date = '2024-12-25'
                       data.index = pd.to_datetime(data.index)
                   
-                      # Ambil nama file yang diupload
-                      uploaded_file = st.session_state.get("uploaded_file", None)
-                      file_name = uploaded_file.name if uploaded_file is not None else ""
-                      file_name_lower = file_name.lower().strip()
+                      train_arima_new = data['Harga'].loc[data.index < new_split_date]
+                      test_arima_new = data['Harga'].loc[data.index >= new_split_date]
                   
-                      if "Cabai Merah" in file_name_lower:
-                          # === CASE CABAI MERAH ===
-                          split_date = '2024-12-26'
-                          y_train = data['Harga'].loc[data.index < split_date]
-                          y_test  = data['Harga'].loc[data.index >= split_date]
+                      # ===============================
+                      # 2. Prediksi untuk data train & test
+                      # ===============================
+                      pred_train = st.session_state.arima_best_model.predict(
+                          start=train_arima_new.index[0],
+                          end=train_arima_new.index[-1],
+                          dynamic=False
+                      )
                   
-                          pred_train = st.session_state.arima_best_model.predict(
-                              start=y_train.index[0],
-                              end=y_train.index[-1],
-                              dynamic=False
-                          )
-                          pred_test = st.session_state.arima_best_model.predict(
-                              start=y_test.index[0],
-                              end=y_test.index[-1],
-                              dynamic=False
-                          )
+                      pred_test = st.session_state.arima_best_model.predict(
+                          start=test_arima_new.index[0],
+                          end=test_arima_new.index[-1],
+                          dynamic=False
+                      )
                   
-                          mape_train = mean_absolute_percentage_error(y_train, pred_train) * 100
-                          mape_test  = mean_absolute_percentage_error(y_test, pred_test) * 100
-                  
-                          hasil_df = pd.DataFrame({
-                              'Tanggal': y_test.index,
-                              'Aktual': y_test.values,
-                              'Prediksi': pred_test.values
-                          })
-                          used_label = "Cabai Merah (split_date = 2024-12-26)"
-                  
-                      elif "Cabai Keriting" in file_name_lower:
-                          # === CASE CABAI KERITING ===
-                          new_split_date = '2024-12-25'
-                          arima_y_train = data['Harga'].loc[data.index < new_split_date]
-                          arima_y_test  = data['Harga'].loc[data.index >= new_split_date]
-                  
-                          pred_train = st.session_state.arima_best_model.predict(
-                              start=arima_y_train.index[0],
-                              end=arima_y_train.index[-1],
-                              dynamic=False
-                          )
-                          pred_test = st.session_state.arima_best_model.predict(
-                              start=arima_y_test.index[0],
-                              end=arima_y_test.index[-1],
-                              dynamic=False
-                          )
-                  
-                          mape_train = mean_absolute_percentage_error(arima_y_train, pred_train) * 100
-                          mape_test  = mean_absolute_percentage_error(arima_y_test, pred_test) * 100
-                  
-                          hasil_df = pd.DataFrame({
-                              'Tanggal': arima_y_test.index,
-                              'Aktual': arima_y_test.values,
-                              'Prediksi': pred_test.values
-                          })
-                          used_label = "Cabai Keriting (new_split_date = 2024-12-25)"
-                  
-                      else:
-                          st.error(f"Nama file tidak dikenali: {file_name}. "
-                                   "Pastikan mengandung kata 'Cabai Merah' atau 'Cabai Keriting'.")
-                          st.stop()
+                      # ===============================
+                      # 3. Hitung MAPE
+                      # ===============================
+                      mape_arima_train = mean_absolute_percentage_error(train_arima_new, pred_train)
+                      mape_arima_test = mean_absolute_percentage_error(test_arima_new, pred_test)
                   
                       # Simpan ke session_state
-                      st.session_state.mape_arima_train = mape_train
-                      st.session_state.mape_arima_test = mape_test
+                      st.session_state.mape_arima_train = mape_arima_train
+                      st.session_state.mape_arima_test = mape_arima_test
                       st.session_state.pred_test_arima = pred_test
-                      st.session_state.test_arima_new = hasil_df.set_index("Tanggal")["Aktual"]
+                      st.session_state.test_arima_new = test_arima_new
+                  
+                      # ===============================
+                      # 4. Simpan hasil dataframe
+                      # ===============================
+                      hasil_df = pd.DataFrame({
+                          'Tanggal': test_arima_new.index,
+                          'Aktual': test_arima_new.values,
+                          'Prediksi': pred_test.values
+                      })
                       st.session_state.hasil_df_arima = hasil_df
-                      st.session_state.split_used_label = used_label
                   
                   # ===============================
-                  # TAMPILKAN HASIL
+                  # TAMPILKAN HASIL JIKA SUDAH ADA
                   # ===============================
                   if "mape_arima_train" in st.session_state and "mape_arima_test" in st.session_state:
                       st.subheader("📊 Hasil Evaluasi Model")
                       st.write(f"**MAPE Train:** {st.session_state.mape_arima_train:.2f}%")
                       st.write(f"**MAPE Test :** {st.session_state.mape_arima_test:.2f}%")
-                      st.write(f"📌 Data Split: {st.session_state.split_used_label}")
                   
                       st.subheader("📉 Visualisasi Prediksi pada Data Test")
                       fig, ax = plt.subplots(figsize=(12, 5))
@@ -622,7 +597,9 @@ elif menu == "📊 Pemodelan & Prediksi":
                       ax.grid(True)
                       st.pyplot(fig)
                   
+                      # Tampilkan DataFrame Hasil Prediksi
                       st.dataframe(st.session_state.hasil_df_arima)
+
             
   # ===== TAB PEMODELAN ARIMAX ===== #
   with tab_arimax:
