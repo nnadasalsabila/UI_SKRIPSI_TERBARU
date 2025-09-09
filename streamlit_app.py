@@ -135,7 +135,7 @@ elif menu == "📊 Pemodelan & Prediksi":
   tab_data, tab_stasioneritas, tab_splitting, tab_arima, tab_arimax, tab_predeval = st.tabs(["📊 Data", "📈 Uji Stasioneritas", "✂ Splitting Data", "⚙ Model ARIMA", "⚙ Model ARIMAX", "🎯 Prediksi Mendatang"])
     
   if uploaded_file:
-      filename = uploaded_file.name
+      #filename = uploaded_file.name
       # Baca file
       if uploaded_file.name.endswith(".csv"):
         data = pd.read_csv(uploaded_file)
@@ -145,11 +145,10 @@ elif menu == "📊 Pemodelan & Prediksi":
       # Pastikan kolom tanggal ada dan jadi index
           
       # Set category based on filename or data
-      if "Keriting" in filename:
-          category = "Keriting"
-          st.info(f"Category set from filename: {category}")
-      else:
-          category = "Merah"
+      #if "Keriting" in filename:
+       #   category = "Keriting"
+      #else:
+       #   category = "Merah"
        
       data.columns = data.columns.str.strip()
       if 'Tanggal' in data.columns:
@@ -385,10 +384,10 @@ elif menu == "📊 Pemodelan & Prediksi":
   
           if 'data' in locals() and data is not None:
               data.index = pd.to_datetime(data.index)
-              if category == "Keriting":
+              #if category == "Keriting":
                  split_date = '2024-12-26'
-              else:
-                 split_date = '2024-12-25'
+              #else:
+                 #split_date = '2024-12-25'
                
               y_train_arima = data['Harga'].loc[data.index < split_date]
               y_test_arima = data['Harga'].loc[data.index >= split_date]
