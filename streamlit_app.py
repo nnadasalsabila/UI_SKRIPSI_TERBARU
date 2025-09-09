@@ -471,7 +471,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       from statsmodels.stats.diagnostic import acorr_ljungbox, het_goldfeldquandt
                       from statsmodels.tools.tools import add_constant
                       import numpy as np
-  
+                  
                       x_dummy = np.arange(len(y_train_arima)).reshape(-1, 1)
                       x_dummy_const = add_constant(x_dummy)
                   
@@ -484,13 +484,18 @@ elif menu == "📊 Pemodelan & Prediksi":
                       ljung_box_result = acorr_ljungbox(residual_arima, lags=[10, 20, 30, 40], return_df=True)
                   
                       # Uji Goldfeld-Quandt
-                      gq_test_arima = het_goldfeldquandt(residual_arima, x_dummy_const)
+                      if "komoditas" in st.session_state and st.session_state["komoditas"].lower() == "cabai merah":
+                          # Sama dengan Python (langsung pakai harga training)
+                          gq_test = het_goldfeldquandt(y_train_arima, x_dummy_const)
+                      else:
+                          # Default: residual ARIMA (cabai keriting, dll.)
+                          gq_test = het_goldfeldquandt(residual_arima, x_dummy_const)
                   
                       # Simpan ke session_state
                       st.session_state["diagnostic_results"] = {
                           "ks": (ks_stat, ks_p_value),
                           "ljungbox": ljung_box_result,
-                          "gq": gq_test_arima
+                          "gq": gq_test
                       }
                   
                   # Tampilkan hasil diagnostik jika sudah ada
@@ -514,11 +519,11 @@ elif menu == "📊 Pemodelan & Prediksi":
                       else:
                           st.error("Residual bukan White Noise (menolak H0).")
                   
-                      gq_test_arima = st.session_state["diagnostic_results"]["gq"]
+                      gq_test = st.session_state["diagnostic_results"]["gq"]
                       st.write("**Goldfeld-Quandt Test**")
-                      st.write(f"Statistik GQ: {gq_test_arima[0]:.8f}")
-                      st.write(f"P-value     : {gq_test_arima[1]:.8f}")
-                      if gq_test_arima[1] <= 0.05:
+                      st.write(f"Statistik GQ: {gq_test[0]:.8f}")
+                      st.write(f"P-value     : {gq_test[1]:.8f}")
+                      if gq_test[1] <= 0.05:
                           st.error("Ada heteroskedastisitas (tolak H0).")
                       else:
                           st.success("Tidak ada heteroskedastisitas (gagal menolak H0).")
