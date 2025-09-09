@@ -378,7 +378,7 @@ elif menu == "📊 Pemodelan & Prediksi":
   
           if 'data' in locals() and data is not None:
               data.index = pd.to_datetime(data.index)
-              if category == "Keriting"
+              if category == "Keriting":
                  split_date = '2024-12-26'
               else:
                  split_date = '2024-12-25'
