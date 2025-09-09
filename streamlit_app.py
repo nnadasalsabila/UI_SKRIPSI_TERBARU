@@ -387,7 +387,7 @@ elif menu == "📊 Pemodelan & Prediksi":
               if category == "Keriting":
                  split_date = '2024-12-26'
               else:
-                 split_date = '2024-12-25'
+                 split_date = '2024-12-26'
                
               y_train_arima = data['Harga'].loc[data.index < split_date]
               y_test_arima = data['Harga'].loc[data.index >= split_date]
@@ -546,7 +546,10 @@ elif menu == "📊 Pemodelan & Prediksi":
                       # ===============================
                       # 1. Split ulang dengan new_split_date
                       # ===============================
-                      new_split_date = '2024-12-25'
+                      if category == "Keriting":
+                         new_split_date = '2024-12-25'
+                      else:
+                         new_split_date = '2024-12-26'
                       data.index = pd.to_datetime(data.index)
                   
                       train_arima_new = data['Harga'].loc[data.index < new_split_date]
