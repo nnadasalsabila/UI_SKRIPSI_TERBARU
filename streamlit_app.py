@@ -532,13 +532,24 @@ elif menu == "📊 Pemodelan & Prediksi":
                           mask = y_true != 0  # hindari pembagian nol
                           return np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100
                   
-                      # ===============================
-                      # 1. Split ulang dengan new_split_date
-                      # ===============================
-                      new_split_date = '2024-12-25'
+                      # Pastikan index datetime
                       data.index = pd.to_datetime(data.index)
-                      train_arima_new = data['Harga'].loc[data.index < new_split_date]
-                      test_arima_new = data['Harga'].loc[data.index >= new_split_date]
+                  
+                      # Deteksi komoditas
+                      komod = st.session_state.get('komoditas', '').strip().lower()
+                  
+                      if komod == "cabai merah":
+                          # === CASE CABAI MERAH ===
+                          split_date = '2024-12-26'
+                          train_arima_new = data['Harga'].loc[data.index < split_date]
+                          test_arima_new = data['Harga'].loc[data.index >= split_date]
+                          used_label = f"Split Date: {split_date} (Cabai Merah)"
+                      else:
+                          # === CASE CABAI KERITING (default) ===
+                          new_split_date = '2024-12-25'
+                          train_arima_new = data['Harga'].loc[data.index < new_split_date]
+                          test_arima_new = data['Harga'].loc[data.index >= new_split_date]
+                          used_label = f"Split Date: {new_split_date} (Cabai Keriting / Lainnya)"
                   
                       # ===============================
                       # 2. Prediksi untuk data train & test
@@ -565,6 +576,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       st.session_state.mape_arima_test = mape_arima_test
                       st.session_state.pred_test_arima = pred_test
                       st.session_state.test_arima_new = test_arima_new
+                      st.session_state.split_used_label = used_label
                   
                       # ===============================
                       # 4. Simpan hasil dataframe
@@ -583,6 +595,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       st.subheader("📊 Hasil Evaluasi Model")
                       st.write(f"**MAPE Train:** {st.session_state.mape_arima_train:.2f}%")
                       st.write(f"**MAPE Test :** {st.session_state.mape_arima_test:.2f}%")
+                      st.write(f"📌 Data Split: {st.session_state.split_used_label}")
                   
                       st.subheader("📉 Visualisasi Prediksi pada Data Test")
                       fig, ax = plt.subplots(figsize=(12, 5))
@@ -597,7 +610,6 @@ elif menu == "📊 Pemodelan & Prediksi":
                   
                       # Tampilkan DataFrame Hasil Prediksi
                       st.dataframe(st.session_state.hasil_df_arima)
-
             
   # ===== TAB PEMODELAN ARIMAX ===== #
   with tab_arimax:
