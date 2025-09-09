@@ -486,7 +486,7 @@ elif menu == "📊 Pemodelan & Prediksi":
                       # Uji Goldfeld-Quandt
                       if "komoditas" in st.session_state and st.session_state["komoditas"].lower() == "cabai merah":
                           # Sama dengan Python (langsung pakai harga training)
-                          gq_test = het_goldfeldquandt(y_train, x_dummy_const)
+                          gq_test = het_goldfeldquandt(y_train_arima, x_dummy_const)
                       else:
                           # Default: residual ARIMA (cabai keriting, dll.)
                           gq_test = het_goldfeldquandt(residual_arima, x_dummy_const)
