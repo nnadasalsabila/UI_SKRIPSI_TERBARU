@@ -142,6 +142,7 @@ elif menu == "📊 Pemodelan & Prediksi":
         data = pd.read_excel(uploaded_file)
 
       # Pastikan kolom tanggal ada dan jadi index
+      category = data.iloc[0, 4]  # Row 0 (first row)
       data.columns = data.columns.str.strip()
       if 'Tanggal' in data.columns:
         data['Tanggal'] = pd.to_datetime(data['Tanggal'], errors='coerce')
@@ -160,6 +161,7 @@ elif menu == "📊 Pemodelan & Prediksi":
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
+          display_data = data.drop(columns=['Category'], errors='ignore')  # Replace 'Category' with actual column name
           st.dataframe(data)
   
           st.subheader("Cek Missing Value")
@@ -376,8 +378,11 @@ elif menu == "📊 Pemodelan & Prediksi":
   
           if 'data' in locals() and data is not None:
               data.index = pd.to_datetime(data.index)
-  
-              split_date = '2024-12-26'
+              if category = "Keriting"
+                 split_date = '2024-12-26'
+              else:
+                 split_date = '2024-12-25'
+               
               y_train_arima = data['Harga'].loc[data.index < split_date]
               y_test_arima = data['Harga'].loc[data.index >= split_date]
   
