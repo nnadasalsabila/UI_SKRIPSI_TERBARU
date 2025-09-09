@@ -161,7 +161,7 @@ elif menu == "📊 Pemodelan & Prediksi":
   with tab_data:
       if 'data' in locals() and data is not None and not data.empty:
           st.subheader("Data Awal")
-          display_data = data.drop(columns=['Category'], errors='ignore')  # Replace 'Category' with actual column name
+          data = data.drop(columns=['Category'], errors='ignore')  # Replace 'Category' with actual column name
           st.dataframe(data)
   
           st.subheader("Cek Missing Value")
